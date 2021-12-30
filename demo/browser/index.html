@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>liquidjs for the browser</title>
+  <script src="node_modules/liquidjs/dist/liquid.browser.min.js"></script>
+</head>
+
+<body>
+  <script>
+    var Liquid = window.liquidjs.Liquid
+    var engine = new Liquid({
+      extname: '.html',
+      cache: true
+    });
+    var src = "<h2>Welcome to {{ name | capitalize}}, {% include 'date.html' %}</h2>";
+    var ctx = {
+      name: 'Liquid',
+      date: new Date()
+    };
+    engine.parseAndRender(src, ctx)
+      .then(function(html) {
+        document.body.innerHTML = html
+      });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,7 @@
+{
+  "extends": ["standard"],
+  "rules": {
+    "no-unused-expressions": "off",
+    "@typescript-eslint/no-var-requires": "off"
+  }
+}

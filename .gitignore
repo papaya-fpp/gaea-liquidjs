@@ -1,0 +1,18 @@
+# logs
+*.log
+npm-debug.log*
+
+# cache
+.rpt2_cache
+coverage/
+.nyc_output/
+
+# modules
+node_modules/
+demo/*/package-lock.json
+demo/*/yarn.json
+
+# editors
+.*.swp
+.vscode
+
