@@ -703,7 +703,14 @@
             if (typeof paths === 'string')
                 paths = paths.split('.');
             return paths.reduce(function (scope, path) {
-                scope = readProperty(scope, path);
+                var preScope = readProperty(scope, path);
+                if (_this.isHexColor(scope) && !preScope) {
+                    var rgbValue = _this.hexToRgba(scope);
+                    scope = readProperty(rgbValue, path);
+                }
+                else {
+                    scope = preScope;
+                }
                 if (isNil(scope) && _this.opts.strictVariables) {
                     throw new InternalUndefinedVariableError(path);
                 }
@@ -728,6 +735,41 @@
             if (key in this.environments)
                 return this.environments;
             return this.globals;
+        };
+        Context.prototype.isHexColor = function (hexStr) {
+            // 十六进制颜色值的正则表达式
+            var reg = /^#([0-9a-fA-f]{6}|[0-9a-fA-f]{3})$/;
+            return hexStr && reg.test(hexStr);
+        };
+        Context.prototype.hexToRgba = function (hexStr) {
+            var rgba = {
+                red: '',
+                green: '',
+                blue: '',
+                alpha: ''
+            };
+            // 如果是16进制颜色
+            if (this.isHexColor(hexStr)) {
+                if (hexStr.length === 4) {
+                    var colorNew = '#';
+                    for (var i = 1; i < 4; i += 1) {
+                        colorNew += hexStr.slice(i, i + 1).concat(hexStr.slice(i, i + 1));
+                    }
+                    hexStr = colorNew;
+                }
+                // 处理六位的颜色值
+                var colorChange = [];
+                for (var i = 1; i < 7; i += 2) {
+                    colorChange.push(parseInt('0x' + hexStr.slice(i, i + 2)));
+                }
+                rgba = {
+                    red: "" + colorChange[0],
+                    green: "" + colorChange[1],
+                    blue: "" + colorChange[2],
+                    alpha: "" + 1
+                };
+            }
+            return rgba;
         };
         return Context;
     }());

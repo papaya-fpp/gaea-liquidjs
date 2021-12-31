@@ -550,7 +550,14 @@ class Context {
         if (typeof paths === 'string')
             paths = paths.split('.');
         return paths.reduce((scope, path) => {
-            scope = readProperty(scope, path);
+            const preScope = readProperty(scope, path);
+            if (this.isHexColor(scope) && !preScope) {
+                const rgbValue = this.hexToRgba(scope);
+                scope = readProperty(rgbValue, path);
+            }
+            else {
+                scope = preScope;
+            }
             if (isNil(scope) && this.opts.strictVariables) {
                 throw new InternalUndefinedVariableError(path);
             }
@@ -575,6 +582,41 @@ class Context {
         if (key in this.environments)
             return this.environments;
         return this.globals;
+    }
+    isHexColor(hexStr) {
+        // 十六进制颜色值的正则表达式
+        const reg = /^#([0-9a-fA-f]{6}|[0-9a-fA-f]{3})$/;
+        return hexStr && reg.test(hexStr);
+    }
+    hexToRgba(hexStr) {
+        let rgba = {
+            red: '',
+            green: '',
+            blue: '',
+            alpha: ''
+        };
+        // 如果是16进制颜色
+        if (this.isHexColor(hexStr)) {
+            if (hexStr.length === 4) {
+                let colorNew = '#';
+                for (let i = 1; i < 4; i += 1) {
+                    colorNew += hexStr.slice(i, i + 1).concat(hexStr.slice(i, i + 1));
+                }
+                hexStr = colorNew;
+            }
+            // 处理六位的颜色值
+            const colorChange = [];
+            for (let i = 1; i < 7; i += 2) {
+                colorChange.push(parseInt('0x' + hexStr.slice(i, i + 2)));
+            }
+            rgba = {
+                red: `${colorChange[0]}`,
+                green: `${colorChange[1]}`,
+                blue: `${colorChange[2]}`,
+                alpha: `${1}`
+            };
+        }
+        return rgba;
     }
 }
 function readProperty(obj, key) {
