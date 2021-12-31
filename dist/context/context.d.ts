@@ -20,5 +20,7 @@ export declare class Context {
     pop(): import("./scope").PlainObject | Drop | undefined;
     bottom(): Scope;
     private findScope;
+    private isHexColor;
+    private hexToRgba;
 }
 export declare function readProperty(obj: Scope, key: string): any;
