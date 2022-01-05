@@ -48,8 +48,16 @@ export default {
         : evalToken(file, ctx))
       : file.getText()
     assert(filepath, () => `illegal filename "${file.getText()}":"${filepath}"`)
-
-    const childCtx = new Context({}, ctx.opts, ctx.sync)
+    let config = {}
+    try {
+      const { sections, ...settings } = ctx.environments.themeConfig;
+      config = {
+        ...ctx.environments, settings
+      }
+    } catch (err) {
+      console.error('ctx.environments.themeConfig 解构失败', err)
+    }
+    const childCtx = new Context(config, ctx.opts, ctx.sync)
     const scope = yield hash.render(ctx)
     if (this['with']) {
       const { value, alias } = this['with']
