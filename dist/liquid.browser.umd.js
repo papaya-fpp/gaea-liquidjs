@@ -1,6 +1,6 @@
 /*
  * liquidjs@9.25.1, https://github.com/harttle/liquidjs
- * (c) 2016-2021 harttle
+ * (c) 2016-2022 harttle
  * Released under the MIT License.
  */
 (function (global, factory) {
@@ -48,6 +48,16 @@
         };
         return __assign.apply(this, arguments);
     };
+
+    function __rest(s, e) {
+        var t = {};
+        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+            t[p] = s[p];
+        if (s != null && typeof Object.getOwnPropertySymbols === "function")
+            for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) if (e.indexOf(p[i]) < 0)
+                t[p[i]] = s[p[i]];
+        return t;
+    }
 
     function __awaiter(thisArg, _arguments, P, generator) {
         return new (P || (P = Promise))(function (resolve, reject) {
@@ -124,6 +134,9 @@
         function Drop() {
         }
         Drop.prototype.valueOf = function () {
+            return undefined;
+        };
+        Drop.prototype.themeConfig = function () {
             return undefined;
         };
         Drop.prototype.liquidMethodMissing = function (key) {
@@ -2730,10 +2743,10 @@
             this.hash = new Hash(tokenizer.remaining());
         },
         render: function (ctx, emitter) {
-            var _a, liquid, file, hash, renderer, filepath, _b, _c, childCtx, scope, _d, value, alias, _e, value, alias, collection, collection_1, collection_1_1, item, templates, e_1_1, templates;
-            var e_1, _f;
-            return __generator(this, function (_g) {
-                switch (_g.label) {
+            var _a, liquid, file, hash, renderer, filepath, _b, _c, config, _d, sections, settings, childCtx, scope, _e, value, alias, _f, value, alias, collection, collection_1, collection_1_1, item, templates, e_1_1, templates;
+            var e_1, _g;
+            return __generator(this, function (_h) {
+                switch (_h.label) {
                     case 0:
                         _a = this, liquid = _a.liquid, file = _a.file, hash = _a.hash;
                         renderer = liquid.renderer;
@@ -2741,73 +2754,81 @@
                         if (!isQuotedToken(file)) return [3 /*break*/, 2];
                         return [4 /*yield*/, renderer.renderTemplates(liquid.parse(evalQuotedToken(file)), ctx)];
                     case 1:
-                        _c = _g.sent();
+                        _c = _h.sent();
                         return [3 /*break*/, 3];
                     case 2:
                         _c = evalToken(file, ctx);
-                        _g.label = 3;
+                        _h.label = 3;
                     case 3:
                         _b = (_c);
                         return [3 /*break*/, 5];
                     case 4:
                         _b = file.getText();
-                        _g.label = 5;
+                        _h.label = 5;
                     case 5:
                         filepath = _b;
                         assert(filepath, function () { return "illegal filename \"" + file.getText() + "\":\"" + filepath + "\""; });
-                        childCtx = new Context({}, ctx.opts, ctx.sync);
+                        config = {};
+                        try {
+                            _d = ctx.environments.themeConfig || { sections: [] }, sections = _d.sections, settings = __rest(_d, ["sections"]);
+                            config = __assign({}, ctx.environments, { settings: settings });
+                        }
+                        catch (err) {
+                            console.error('ctx.environments.themeConfig 解构失败', err);
+                        }
+                        childCtx = new Context(config, ctx.opts, ctx.sync);
                         return [4 /*yield*/, hash.render(ctx)];
                     case 6:
-                        scope = _g.sent();
+                        scope = _h.sent();
                         if (this['with']) {
-                            _d = this['with'], value = _d.value, alias = _d.alias;
+                            _e = this['with'], value = _e.value, alias = _e.alias;
                             scope[alias || filepath] = evalToken(value, ctx);
                         }
                         childCtx.push(scope);
                         if (!this['for']) return [3 /*break*/, 16];
-                        _e = this['for'], value = _e.value, alias = _e.alias;
+                        _f = this['for'], value = _f.value, alias = _f.alias;
                         collection = evalToken(value, ctx);
                         collection = toEnumerable(collection);
                         scope['forloop'] = new ForloopDrop(collection.length);
-                        _g.label = 7;
+                        _h.label = 7;
                     case 7:
-                        _g.trys.push([7, 13, 14, 15]);
+                        _h.trys.push([7, 13, 14, 15]);
                         collection_1 = __values(collection), collection_1_1 = collection_1.next();
-                        _g.label = 8;
+                        _h.label = 8;
                     case 8:
                         if (!!collection_1_1.done) return [3 /*break*/, 12];
                         item = collection_1_1.value;
                         scope[alias] = item;
                         return [4 /*yield*/, liquid._parseFile(filepath, childCtx.opts, childCtx.sync)];
                     case 9:
-                        templates = _g.sent();
+                        templates = _h.sent();
                         return [4 /*yield*/, renderer.renderTemplates(templates, childCtx, emitter)];
                     case 10:
-                        _g.sent();
+                        _h.sent();
                         scope.forloop.next();
-                        _g.label = 11;
+                        _h.label = 11;
                     case 11:
                         collection_1_1 = collection_1.next();
                         return [3 /*break*/, 8];
                     case 12: return [3 /*break*/, 15];
                     case 13:
-                        e_1_1 = _g.sent();
+                        e_1_1 = _h.sent();
                         e_1 = { error: e_1_1 };
                         return [3 /*break*/, 15];
                     case 14:
                         try {
-                            if (collection_1_1 && !collection_1_1.done && (_f = collection_1.return)) _f.call(collection_1);
+                            if (collection_1_1 && !collection_1_1.done && (_g = collection_1.return)) _g.call(collection_1);
                         }
                         finally { if (e_1) throw e_1.error; }
                         return [7 /*endfinally*/];
                     case 15: return [3 /*break*/, 19];
                     case 16: return [4 /*yield*/, liquid._parseFile(filepath, childCtx.opts, childCtx.sync)];
                     case 17:
-                        templates = _g.sent();
+                        templates = _h.sent();
                         return [4 /*yield*/, renderer.renderTemplates(templates, childCtx, emitter)];
                     case 18:
-                        _g.sent();
-                        _g.label = 19;
+                        _h.sent();
+                        _h.label = 19;
                     case 19: return [2 /*return*/];
                 }
             });

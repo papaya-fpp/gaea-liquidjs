@@ -1,6 +1,6 @@
 /*
  * liquidjs@9.25.1, https://github.com/harttle/liquidjs
- * (c) 2016-2021 harttle
+ * (c) 2016-2022 harttle
  * Released under the MIT License.
  */
 'use strict';
@@ -12,6 +12,9 @@ var fs$1 = require('fs');
 
 class Drop {
     valueOf() {
+        return undefined;
+    }
+    themeConfig() {
         return undefined;
     }
     liquidMethodMissing(key) {
@@ -44,6 +47,16 @@ var __assign = function() {
     };
     return __assign.apply(this, arguments);
 };
+
+function __rest(s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) if (e.indexOf(p[i]) < 0)
+            t[p[i]] = s[p[i]];
+    return t;
+}
 
 const toStr = Object.prototype.toString;
 const toLowerCase = String.prototype.toLowerCase;
@@ -2135,7 +2148,15 @@ var render = {
                 : evalToken(file, ctx))
             : file.getText();
         assert(filepath, () => `illegal filename "${file.getText()}":"${filepath}"`);
-        const childCtx = new Context({}, ctx.opts, ctx.sync);
+        let config = {};
+        try {
+            const _a = ctx.environments.themeConfig || { sections: [] }, { sections } = _a, settings = __rest(_a, ["sections"]);
+            config = Object.assign({}, ctx.environments, { settings });
+        }
+        catch (err) {
+            console.error('ctx.environments.themeConfig 解构失败', err);
+        }
+        const childCtx = new Context(config, ctx.opts, ctx.sync);
         const scope = yield hash.render(ctx);
         if (this['with']) {
             const { value, alias } = this['with'];

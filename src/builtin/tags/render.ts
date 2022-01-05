@@ -50,7 +50,7 @@ export default {
     assert(filepath, () => `illegal filename "${file.getText()}":"${filepath}"`)
     let config = {}
     try {
-      const { sections, ...settings } = ctx.environments.themeConfig;
+      const { sections, ...settings } = ctx.environments.themeConfig || { sections: [] }
       config = {
         ...ctx.environments, settings
       }
