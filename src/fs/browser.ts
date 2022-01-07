@@ -1,56 +1,25 @@
 import { last } from '../util/underscore'
-
-function domResolve (root: string, path: string) {
-  const base = document.createElement('base')
-  base.href = root
-
-  const head = document.getElementsByTagName('head')[0]
-  head.insertBefore(base, head.firstChild)
-
-  const a = document.createElement('a')
-  a.href = path
-  const resolved = a.href
-  head.removeChild(base)
-
-  return resolved
-}
+import ThemeDataScope from './ThemeDataScope'
 
 export function resolve (root: string, filepath: string, ext: string) {
-  if (root.length && last(root) !== '/') root += '/'
-  const url = domResolve(root, filepath)
-  return url.replace(/^(\w+:\/\/[^/]+)(\/[^?]+)/, (str, origin, path) => {
-    const last = path.split('/').pop()
-    if (/\.\w+$/.test(last)) return str
-    return origin + path + ext
-  })
+  return filepath
 }
 
-export async function readFile (url: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest()
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        resolve(xhr.responseText as string)
-      } else {
-        reject(new Error(xhr.statusText))
-      }
-    }
-    xhr.onerror = () => {
-      reject(new Error('An error occurred whilst receiving the response.'))
-    }
-    xhr.open('GET', url)
-    xhr.send()
-  })
+export async function readFile (file: string): Promise<string> {
+
+  const themeScope = new ThemeDataScope();
+  // console.log(themeScope.rootData.filter(i=> i.name==='sections')[0], '-----rd')
+  if (themeScope.rootData) {
+    const template = themeScope.getTpl(file);
+    if (template !== undefined) {
+      return Promise.resolve(template);
+    } 
+  }
+  return Promise.resolve(`没有你的模板: ${file}`)
 }
 
 export function readFileSync (url: string): string {
-  const xhr = new XMLHttpRequest()
-  xhr.open('GET', url, false)
-  xhr.send()
-  if (xhr.status < 200 || xhr.status >= 300) {
-    throw new Error(xhr.statusText)
-  }
-  return xhr.responseText as string
+  return url
 }
 
 export async function exists (filepath: string) {
