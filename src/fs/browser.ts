@@ -6,14 +6,13 @@ export function resolve (root: string, filepath: string, ext: string) {
 }
 
 export async function readFile (file: string): Promise<string> {
-
-  const themeScope = new ThemeDataScope();
+  const themeScope = new ThemeDataScope()
   // console.log(themeScope.rootData.filter(i=> i.name==='sections')[0], '-----rd')
   if (themeScope.rootData) {
-    const template = themeScope.getTpl(file);
+    const template = themeScope.getTpl(file)
     if (template !== undefined) {
-      return Promise.resolve(template);
-    } 
+      return Promise.resolve(template)
+    }
   }
   return Promise.resolve(`没有你的模板: ${file}`)
 }
