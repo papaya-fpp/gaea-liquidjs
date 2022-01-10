@@ -1,7 +1,6 @@
+/* eslint-disable */
 
-interface DOMAIN_THEME_ROOT_DATA {
-  [key: string]: THEME_DIR
-}
+type DOMAIN_THEME_ROOT_DATA = Array <THEME_DIR>
 
 interface THEME_DIR {
   type: 'folder' | 'file';
@@ -17,28 +16,32 @@ interface THEME__FILE__SCHEMA {
 }
 
 const pickUniqueTpl = (tplPath: string, rootData: DOMAIN_THEME_ROOT_DATA): string => {
-  const data = rootData;
+  const data = rootData
 
   const findDir = (data: Array<THEME_DIR>, dirName: string): THEME_DIR => {
     // 遍历所有目录,取数据
-    let result: THEME_DIR;
+    let result: THEME_DIR = {
+      type: 'folder',
+      name: '',
+      data: []
+    }
 
     for (let i = 0; i < data.length; i++) {
       if (data[i].type === 'folder') {
         if (data[i].name === dirName) {
-          result = data[i];
-          break;
+          result = data[i]
+          break
         } else {
-          findDir(data[i].data, dirName);
+          findDir(data[i].data, dirName)
         }
       }
     }
-    return result;
-  };
+    return result
+  }
 
   const getFileValue = (data: Array<THEME_DIR>, dirName: string) => {
-    const __data = data;
-    let result: THEME__FILE__SCHEMA;
+    const __data = data
+    let result: any = {}
 
     for (let i = 0; i < __data.length; i++) {
       if (__data[i].type === 'file') {
@@ -49,65 +52,65 @@ const pickUniqueTpl = (tplPath: string, rootData: DOMAIN_THEME_ROOT_DATA): strin
         ) {
           // 'templates/home' 或者 'templates/home.liquid'
           // console.log('---layout', __data[i], dirName)
-          result = <THEME__FILE__SCHEMA>(<unknown>__data[i].data);
-          break;
+          result = <THEME__FILE__SCHEMA>(<unknown>__data[i].data)
+          break
         }
       }
     }
-    return result && result.value;
-  };
+    return result && result.value
+  }
 
-  let result;
+  let result: any = {}
 
-  const pathArr = tplPath.split('/');
+  const pathArr = tplPath.split('/')
 
-  const findValue = (pathArr) => {
-    let currentDir = data;
-    let result;
+  const findValue = (pathArr: string | any[]) => {
+    let currentDir = data
+    let result
 
     for (let i = 0; i < pathArr.length; ) {
       // ['templates', 'home.liqud'] or ['home.liquid']
 
       if (i !== pathArr.length - 1) {
         // 如果不是最后一个,说明当前索引的是文件夹
-        const dir = findDir(currentDir, pathArr[i]);
+        const dir = findDir(currentDir, pathArr[i])
         if (dir) {
-          currentDir = dir.data;
+          currentDir = dir.data
         }
       }
       if (currentDir) {
-        i++;
+        i++
       } else {
-        return;
+        return
       }
     }
 
     // console.log(currentDir, '---end')
 
     if (currentDir) {
-      result = getFileValue(currentDir, pathArr[pathArr.length - 1]);
+      result = getFileValue(currentDir, pathArr[pathArr.length - 1])
     }
-    return result;
-  };
+    return result
+  }
 
   if (pathArr.length > 1) {
-    result = findValue(pathArr);
+    result = findValue(pathArr)
   } else {
     if (!result) {
       // 可能是直接从sections或者snippets里面找
-      const newPathArr = ['sections'].concat(pathArr);
-      result = findValue(newPathArr);
+      const newPathArr = ['sections'].concat(pathArr)
+      result = findValue(newPathArr)
     }
 
     if (!result) {
       // 可能是直接从sections或者snippets里面找
-      const newPathArr = ['snippets'].concat(pathArr);
-      result = findValue(newPathArr);
+      const newPathArr = ['snippets'].concat(pathArr)
+      result = findValue(newPathArr)
     }
   }
 
-  return result;
-};
+  return result
+}
 
 class ThemeDataScope {
   rootData: DOMAIN_THEME_ROOT_DATA;
@@ -117,14 +120,14 @@ class ThemeDataScope {
     if (themeData) {
       this.rootData = JSON.parse(themeData)
     } else {
-      throw new Error("没有获取到 themeData");
+      throw new Error("没有获取到 themeData")
     }
   }
   getTpl(tplPath: string): string {
     // "layout/themes"
-    const result = pickUniqueTpl(tplPath, this.rootData);
-    return <string>(<unknown>result);
+    const result = pickUniqueTpl(tplPath, this.rootData)
+    return <string>(<unknown>result)
   }
 }
 
-export default ThemeDataScope;
+export default ThemeDataScope
