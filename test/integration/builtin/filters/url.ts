@@ -12,4 +12,9 @@ describe('filters/url', function () {
     it('should encode <space>',
       () => test('{{ "Tetsuro Takara" | url_encode }}', 'Tetsuro+Takara'))
   })
+
+  describe('url_escape', function () {
+    it('should escape url',
+      () => test('{{ "<hello> & <shopify>" | url_escape }}', '%3Chello%3E%20%26%20%3Cshopify%3E'))
+  })
 })
