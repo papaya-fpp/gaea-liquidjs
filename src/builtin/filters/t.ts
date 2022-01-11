@@ -42,10 +42,10 @@ export function t (this: FilterImpl, variable: string, args: Array<any>) {
   const locales = domainFiles.filter((item: THEME_DIR) => item.name === 'locales')[0].data
   let currentLanguageJson: any
   try {
-    currentLanguageJson = locales.filter((item: THEME_DIR) => item.name === `${language}.json`)[0].data
+    currentLanguageJson = (locales as Array<THEME_DIR>).filter((item: THEME_DIR) => item.name === `${language}.json`)[0].data
   } catch (error) {
     console.log(`该模板C端没有适配该语言: ${language}, 使用默认语言包 en.default.json`)
-    currentLanguageJson = locales.filter((item: THEME_DIR) => item.name === `en.default.json`)[0].data
+    currentLanguageJson = (locales as Array<THEME_DIR>).filter((item: THEME_DIR) => item.name === `en.default.json`)[0].data
   }
 
   currentLanguageJsonObj = JSON.parse(currentLanguageJson.value)

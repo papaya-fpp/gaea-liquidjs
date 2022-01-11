@@ -10,7 +10,8 @@
     "resolveJsonModule": true,
     "downlevelIteration": true,
     "strict": true,
-    "suppressImplicitAnyIndexErrors": true
+    "suppressImplicitAnyIndexErrors": true,
+    "noImplicitAny": false,
   },
   "all": true,
   "exclude": [ "node_modules", "dist", "demo" ]

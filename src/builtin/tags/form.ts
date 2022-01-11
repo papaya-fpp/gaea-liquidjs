@@ -21,7 +21,8 @@ function parseArgsToFormJson (args: string): object {
   const defaultArgsJson = {
     enctype: 'multipart/form-data',
     method: 'post',
-    'accept-charset': 'UTF-8'
+    'accept-charset': 'UTF-8',
+    type: ''
   }
   if (!argsList.length) {
     return defaultArgsJson
@@ -50,7 +51,7 @@ function parseArgsToFormJson (args: string): object {
 }
 
 function parseToForm (args: string) {
-  const argsJson = parseArgsToFormJson(args)
+  const argsJson: any = parseArgsToFormJson(args)
   const defaultFormStr = `<form ${joinJsonToStr(argsJson)}>
     <input type="hidden" value="${argsJson.type || ''}" name="form_type">
     <input type="hidden" name="utf8" value="✓">
@@ -77,7 +78,7 @@ export default {
 
   render: function * (ctx: Context, emitter: Emitter) {
     const r = this.liquid.renderer
-    const html = yield r.renderTemplates(this.templates, ctx)
+    const html: any = yield r.renderTemplates(this.templates, ctx)
     const str = `${this.args}${html}</form>`
     return str
   }
