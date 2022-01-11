@@ -6,11 +6,11 @@ export default {
     const stream = this.liquid.parser.parseStream(remainTokens)
     stream
       .on('token', (tagToken) => {
-        if (tagToken.name === 'endschema') stream.stop()
+        if (tagToken['name'] === 'endschema') stream.stop()
         else this.tokens.push(tagToken)
       })
       .on('end', () => {
-        throw new Error(`tag ${tagToken.raw} not closed`)
+        throw new Error(`tag ${tagToken['raw']} not closed`)
       })
     stream.start()
   },

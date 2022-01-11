@@ -27,7 +27,7 @@ function getI18nLabel (nameString: string, currentLanguageJsonObj: object, args:
   if (isArray(args) && args.length === 2 && isString(node)) {
     const [variableKey, variableValue] = args
     const regexp = new RegExp(`{{\\s?${variableKey}\\s?}}`, 'g')
-    node = node.replace(regexp, variableValue)
+    node = (node as string).replace(regexp, variableValue)
   }
 
   return node

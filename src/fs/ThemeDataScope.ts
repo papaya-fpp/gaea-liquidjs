@@ -32,7 +32,7 @@ const pickUniqueTpl = (tplPath: string, rootData: DOMAIN_THEME_ROOT_DATA): strin
           result = data[i]
           break
         } else {
-          findDir(data[i].data, dirName)
+          findDir((data[i].data as THEME_DIR[]), dirName)
         }
       }
     }
@@ -75,7 +75,7 @@ const pickUniqueTpl = (tplPath: string, rootData: DOMAIN_THEME_ROOT_DATA): strin
         // 如果不是最后一个,说明当前索引的是文件夹
         const dir = findDir(currentDir, pathArr[i])
         if (dir) {
-          currentDir = dir.data
+          currentDir = (dir.data as THEME_DIR[])
         }
       }
       if (currentDir) {
