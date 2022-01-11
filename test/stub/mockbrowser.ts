@@ -84,7 +84,7 @@ export function mockThemeDataInLocalstorage(props:{
         {
             name: 'sections',
             type: 'folder',
-            data: props.sections
+            data: props && props.sections
         },
         {
             name: 'config',

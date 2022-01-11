@@ -29,10 +29,9 @@ export default {
     let filePath = TypeGuards.isQuotedToken(this.file) ? yield renderer.renderTemplates(liquid.parse(evalQuotedToken(file)), ctx) : evalToken(file, ctx)
     // const templates = getSectionLiquid(this.domainFiles, filePath)
 
-    if(filePath.indexOf('sections/') < 0) {
+    if (filePath.indexOf('sections/') < 0) {
       filePath = `sections/${filePath}`
     }
-
 
     let section: any = {}
     if (Array.isArray(sections)) {
@@ -43,7 +42,7 @@ export default {
 
     const scope = yield hash.render(ctx)
     // ctx.push(scope)
-    const childCtx = { ...ctx.environments, section, settings, ...scope,...ctx.globals }
+    const childCtx = { ...ctx.environments, section, settings, ...scope, ...ctx.globals }
 
     // 官方在这里用的是 renderer.renderTemplates
     let html = yield this.liquid.renderFile(filePath, childCtx)
