@@ -4334,25 +4334,51 @@
         return "Please enter a valid " + formErrors.error_strings;
     }
 
+    var toColorString = function (colorObject) {
+        try {
+            var r = colorObject.r, g = colorObject.g, b = colorObject.b, a = colorObject.a;
+            return "rgba(" + r + "," + g + "," + b + "," + a + ")";
+        }
+        catch (error) {
+            return '';
+        }
+    };
+    /**
+     * 自定义 color 过滤器，并将 color 过滤器注册到 Liquid 中，color 过滤器用于颜色转换
+     *
+     * @param {object} Liquid
+     * @see https://liquidjs.com/zh-cn/tutorials/plugins.html
+     */
+    function color(x) {
+        return toColorString(x);
+    }
+
+    /**
+     * 自定义 money_with_currency 过滤器，并将 money_with_currency 过滤器注册到 Liquid 中
+     * money_with_currency 过滤器用于将数值转换为带货币标识的字符串
+     *
+     * @param {object} Liquid
+     * @see https://liquidjs.com/zh-cn/tutorials/plugins.html
+     */
+    function moneyWithCurrency(price) {
+        return "$ " + String(price) + " USD";
+    }
+
+    /**
+     * 自定义 money 过滤器，并将 money 过滤器注册到 Liquid 中
+     * money 过滤器用于将数值转换为不带货币标识的字符串
+     *
+     * @param {object} Liquid
+     * @see https://liquidjs.com/zh-cn/tutorials/plugins.html
+     */
+    function money(price) {
+        return "$ " + String(price);
+    }
+
 
 
     var builtinFilters = /*#__PURE__*/Object.freeze({
-        append: append,
-        prepend: prepend,
-        lstrip: lstrip,
-        downcase: downcase,
-        upcase: upcase,
-        remove: remove,
-        removeFirst: removeFirst,
-        rstrip: rstrip,
-        split: split,
-        strip: strip,
-        stripNewlines: stripNewlines,
-        capitalize: capitalize,
-        replace: replace,
-        replaceFirst: replaceFirst,
-        truncate: truncate,
-        truncatewords: truncatewords,
+        t: t,
         escape: escape,
         escapeOnce: escapeOnce,
         newlineToBr: newlineToBr,
@@ -4375,6 +4401,22 @@
         date: date,
         Default: Default,
         json: json,
+        append: append,
+        prepend: prepend,
+        lstrip: lstrip,
+        downcase: downcase,
+        upcase: upcase,
+        remove: remove,
+        removeFirst: removeFirst,
+        rstrip: rstrip,
+        split: split,
+        strip: strip,
+        stripNewlines: stripNewlines,
+        capitalize: capitalize,
+        replace: replace,
+        replaceFirst: replaceFirst,
+        truncate: truncate,
+        truncatewords: truncatewords,
         abs: abs,
         atLeast: atLeast,
         atMost: atMost,
@@ -4387,11 +4429,13 @@
         round: round,
         plus: plus,
         sortNatural: sortNatural,
-        t: t,
         imageUrl: imageUrl,
         stylesheetTag: stylesheetTag,
         assetUrl: assetUrl,
-        defaultErrors: defaultErrors
+        defaultErrors: defaultErrors,
+        color: color,
+        moneyWithCurrency: moneyWithCurrency,
+        money: money
     });
 
     var TagMap = /** @class */ (function () {

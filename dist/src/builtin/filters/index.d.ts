@@ -10,3 +10,6 @@ export * from './media';
 export * from './stylesheet_tag';
 export * from './asset_url';
 export * from './default_errors';
+export * from './color';
+export * from './filter-money_with_currency';
+export * from './filter-money';
