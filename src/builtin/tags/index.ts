@@ -19,13 +19,14 @@ import Continue from './continue'
 import echo from './echo'
 import form from './form'
 import javascript from './javascript'
+import style from './style'
 import liquid from './liquid'
 import { TagImplOptions } from '../../template/tag/tag-impl-options'
 
 import section from './section'
 
 const tags: { [key: string]: TagImplOptions } = {
-  assign, 'for': For, capture, 'case': Case, comment, include, render, decrement, increment, cycle, 'if': If, layout, block, raw, tablerow, unless, 'break': Break, 'continue': Continue, echo, form, javascript, section, liquid
+  assign, 'for': For, capture, 'case': Case, comment, include, render, decrement, increment, cycle, 'if': If, layout, block, raw, tablerow, unless, 'break': Break, 'continue': Continue, echo, form, javascript, style, section, liquid
 }
 
 export default tags
