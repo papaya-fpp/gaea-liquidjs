@@ -9,7 +9,6 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var path = require('path');
 var fs$1 = require('fs');
-var lodash = require('lodash');
 
 class Drop {
     valueOf() {
@@ -166,6 +165,9 @@ function changeCase(str) {
 }
 function ellipsis(str, N) {
     return str.length > N ? str.substr(0, N - 3) + '...' : str;
+}
+function isPlainObject(value) {
+    return isObject(value) && !isArray(value) && !isFunction(value);
 }
 // compare string in case-insensitive way, undefined values to the tail
 function caseInsensitiveCompare(a, b) {
@@ -3361,14 +3363,14 @@ function getI18nLabel(nameString, currentLanguageJsonObj, args) {
     const labelTreeList = nameString.split('.');
     for (let i = 0; i < labelTreeList.length; i++) {
         const currentNode = labelTreeList[i];
-        if (node && lodash.isPlainObject(node)) {
+        if (node && isPlainObject(node)) {
             node = node[currentNode];
         }
     }
     /**
        * 如果使用该 filter 时传入了两个参数，则认为当前翻译中有变量，需要进行变量替换
        */
-    if (lodash.isArray(args) && args.length === 2 && lodash.isString(node)) {
+    if (isArray(args) && args.length === 2 && isString(node)) {
         const [variableKey, variableValue] = args;
         const regexp = new RegExp(`{{\\s?${variableKey}\\s?}}`, 'g');
         node = node.replace(regexp, variableValue);

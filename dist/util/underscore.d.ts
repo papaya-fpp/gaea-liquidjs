@@ -26,6 +26,7 @@ export declare function identify<T>(val: T): T;
 export declare function snakeCase(str: string): string;
 export declare function changeCase(str: string): string;
 export declare function ellipsis(str: string, N: number): string;
+export declare function isPlainObject(value: any): boolean;
 export declare function caseInsensitiveCompare(a: any, b: any): 1 | 0 | -1;
 export declare function joinJsonToStr(json: object): string;
 export declare function getLiquidValue(str: string): string;

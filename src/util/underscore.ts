@@ -136,6 +136,10 @@ export function ellipsis (str: string, N: number): string {
   return str.length > N ? str.substr(0, N - 3) + '...' : str
 }
 
+export function isPlainObject (value: any) {
+  return isObject(value) && !isArray(value) && !isFunction(value)
+}
+
 // compare string in case-insensitive way, undefined values to the tail
 export function caseInsensitiveCompare (a: any, b: any) {
   if (a == null && b == null) return 0

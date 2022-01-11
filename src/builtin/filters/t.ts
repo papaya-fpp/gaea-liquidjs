@@ -1,7 +1,7 @@
 import { FilterImpl } from '../../template/filter/filter-impl'
 import { THEME_DIR } from '../../types'
 
-import { isPlainObject, isArray, isString } from 'lodash'
+import { isArray, isString, isPlainObject } from '../../util/underscore'
 import ThemeDataScope from '../../fs/ThemeDataScope'
 
 const quoted = /^'[^']*'|"[^"]*"$/

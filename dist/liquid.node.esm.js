@@ -5,7 +5,6 @@
  */
 import { extname, resolve as resolve$1 } from 'path';
 import { statSync, readFileSync as readFileSync$1, stat, readFile as readFile$1 } from 'fs';
-import { isPlainObject, isArray as isArray$1, isString as isString$1 } from 'lodash';
 
 class Drop {
     valueOf() {
@@ -162,6 +161,9 @@ function changeCase(str) {
 }
 function ellipsis(str, N) {
     return str.length > N ? str.substr(0, N - 3) + '...' : str;
+}
+function isPlainObject(value) {
+    return isObject(value) && !isArray(value) && !isFunction(value);
 }
 // compare string in case-insensitive way, undefined values to the tail
 function caseInsensitiveCompare(a, b) {
@@ -3365,7 +3367,7 @@ function getI18nLabel(nameString, currentLanguageJsonObj, args) {
     /**
        * 如果使用该 filter 时传入了两个参数，则认为当前翻译中有变量，需要进行变量替换
        */
-    if (isArray$1(args) && args.length === 2 && isString$1(node)) {
+    if (isArray(args) && args.length === 2 && isString(node)) {
         const [variableKey, variableValue] = args;
         const regexp = new RegExp(`{{\\s?${variableKey}\\s?}}`, 'g');
         node = node.replace(regexp, variableValue);

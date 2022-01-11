@@ -4,10 +4,10 @@
  * Released under the MIT License.
  */
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('lodash')) :
-    typeof define === 'function' && define.amd ? define(['exports', 'lodash'], factory) :
-    (global = global || self, factory(global.liquidjs = {}, global.lodash));
-}(this, function (exports, lodash) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+    typeof define === 'function' && define.amd ? define(['exports'], factory) :
+    (global = global || self, factory(global.liquidjs = {}));
+}(this, function (exports) { 'use strict';
 
     /*! *****************************************************************************
     Copyright (c) Microsoft Corporation. All rights reserved.
@@ -246,6 +246,9 @@
     }
     function ellipsis(str, N) {
         return str.length > N ? str.substr(0, N - 3) + '...' : str;
+    }
+    function isPlainObject(value) {
+        return isObject(value) && !isArray(value) && !isFunction(value);
     }
     // compare string in case-insensitive way, undefined values to the tail
     function caseInsensitiveCompare(a, b) {
@@ -4255,14 +4258,14 @@
         var labelTreeList = nameString.split('.');
         for (var i = 0; i < labelTreeList.length; i++) {
             var currentNode = labelTreeList[i];
-            if (node && lodash.isPlainObject(node)) {
+            if (node && isPlainObject(node)) {
                 node = node[currentNode];
             }
         }
         /**
            * 如果使用该 filter 时传入了两个参数，则认为当前翻译中有变量，需要进行变量替换
            */
-        if (lodash.isArray(args) && args.length === 2 && lodash.isString(node)) {
+        if (isArray(args) && args.length === 2 && isString(node)) {
             var _a = __read(args, 2), variableKey = _a[0], variableValue = _a[1];
             var regexp = new RegExp("{{\\s?" + variableKey + "\\s?}}", 'g');
             node = node.replace(regexp, variableValue);
