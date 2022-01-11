@@ -1,6 +1,7 @@
 import { Emitter, TagToken, Context, TagImplOptions } from '../../types'
 import { Tokenizer } from '../../parser/tokenizer'
 import { joinJsonToStr, getLiquidValue } from '../../util/underscore'
+import { evalQuotedToken } from '../../render/expression'
 
 /******
  * 不同类型自定义参数配置
@@ -57,29 +58,34 @@ function parseToForm (args: string) {
   return defaultFormStr
 }
 
-export const endform = {
-  render: function () {
-    return '</form>'
-  }
-}
-
 export default {
-  parse: function (tagToken: TagToken) {
-    const args = parseToForm(tagToken.args)
-    this.tokenizer = new Tokenizer(args, this.liquid.options.operatorsTrie)
+  parse: function (tagToken: TagToken, remainTokens) {
+    const tokenizer = new Tokenizer(tagToken.args, this.liquid.options.operatorsTrie)
+    this.variable = readVariableName(tokenizer)
+    this.templates = []
+    const stream = this.liquid.parser.parseStream(remainTokens)
+    this.args = parseToForm(tagToken.args)
+    stream.on('tag:endform', () => stream.stop())
+      .on('template', (tpl) => {
+        this.templates.push(tpl)
+      })
+      .on('end', () => {
+        throw new Error(`tag ${tagToken.getText()} not closed`)
+      })
+    stream.start()
   },
 
   render: function * (ctx: Context, emitter: Emitter) {
-    const { liquid, tokenizer } = this
-    const tokens = tokenizer.readTopLevelTokens(liquid.options)
-    const templates = liquid.parser.parse(tokens)
-    for (const tpl of templates) {
-      try {
-        const html = yield tpl.render(ctx, emitter)
-        html && emitter.write(html)
-      } catch (err) {
-        console.error('liquid tag parseError', err)
-      }
-    }
+    const r = this.liquid.renderer
+    const html = yield r.renderTemplates(this.templates, ctx)
+    const str = `${this.args}${html}</form>`
+    return str
   }
 } as TagImplOptions
+
+function readVariableName (tokenizer: Tokenizer) {
+  const word = tokenizer.readIdentifier().content
+  if (word) return word
+  const quoted = tokenizer.readQuoted()
+  if (quoted) return evalQuotedToken(quoted)
+}
