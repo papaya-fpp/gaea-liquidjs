@@ -50,7 +50,8 @@ const settingsData = {
 }
 
 export function mockThemeDataInLocalstorage(props:{
-    sections: Array<THEME_DIR>
+    sections?: Array<THEME_DIR>
+    assets?: Array<THEME_DIR>
 }) {
     const lsBulk = {}
 
@@ -98,6 +99,12 @@ export function mockThemeDataInLocalstorage(props:{
                     }
                 }
             ]
+        },
+
+        {
+            name: 'assets',
+            type: 'folder',
+            data: props && props.assets
         },
         
     ]
