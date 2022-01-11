@@ -34,3 +34,8 @@ export function newlineToBr (v: string) {
 export function stripHtml (v: string) {
   return v.replace(/<script.*?<\/script>|<!--.*?-->|<style.*?<\/style>|<.*?>/g, '')
 }
+
+// eslint-disable-next-line @typescript-eslint/camelcase
+// export function strip_html(v: string) {
+//   return v.replace(/<script.*?<\/script>|<!--.*?-->|<style.*?<\/style>|<.*?>/g, '')
+// }
