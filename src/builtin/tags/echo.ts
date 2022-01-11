@@ -16,7 +16,7 @@ export default {
         const html = yield tpl.render(ctx, emitter)
         html && emitter.write(html)
       } catch (err) {
-        console.error('liquid 标签 parseError', err)
+        console.error('liquid tag parseError', err)
       }
     }
   }
