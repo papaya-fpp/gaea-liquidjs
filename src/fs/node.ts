@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as _ from '../util/underscore'
 import { resolve as nodeResolve, extname } from 'path'
 import { stat, statSync, readFile as nodeReadFile, readFileSync as nodeReadFileSync } from 'fs'

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import BlockMode from '../../context/block-mode'
 import { BlockDrop } from '../../drop/block-drop'
 import { ParseStream, TagToken, TopLevelToken, Template, Context, TagImpl, Emitter } from '../../types'

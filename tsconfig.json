@@ -9,9 +9,12 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "downlevelIteration": true,
-    "strict": true,
-    "suppressImplicitAnyIndexErrors": true
+    "strict": false,
+    "suppressImplicitAnyIndexErrors": false,
+    "noImplicitAny": false,
+    "noStrictGenericChecks": false,
+    "suppressExcessPropertyErrors": false
   },
-  "all": true,
+  "all": false,
   "exclude": [ "node_modules", "dist", "demo" ]
 }
