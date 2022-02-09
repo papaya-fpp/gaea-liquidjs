@@ -2172,7 +2172,9 @@ var render = {
         assert(filepath, () => `illegal filename "${file.getText()}":"${filepath}"`);
         let config = {};
         try {
-            const _a = ctx.environments.themeConfig || { sections: [] }, { sections } = _a, settings = __rest(_a, ["sections"]);
+            // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+            // @ts-ignore
+            const _a = ctx.environments.themeConfig || ctx.environments.settings || { sections: [] }, { sections } = _a, settings = __rest(_a, ["sections"]);
             config = Object.assign({}, ctx.environments, { settings });
         }
         catch (err) {
@@ -3482,11 +3484,22 @@ function money(price) {
 
 
 var builtinFilters = /*#__PURE__*/Object.freeze({
-  t: t,
   escape: escape,
   escapeOnce: escapeOnce,
   newlineToBr: newlineToBr,
   stripHtml: stripHtml,
+  abs: abs,
+  atLeast: atLeast,
+  atMost: atMost,
+  ceil: ceil,
+  dividedBy: dividedBy,
+  floor: floor,
+  minus: minus,
+  modulo: modulo,
+  times: times,
+  round: round,
+  plus: plus,
+  sortNatural: sortNatural,
   urlDecode: urlDecode,
   urlEncode: urlEncode,
   urlEscape: urlEscape,
@@ -3521,18 +3534,7 @@ var builtinFilters = /*#__PURE__*/Object.freeze({
   replaceFirst: replaceFirst,
   truncate: truncate,
   truncatewords: truncatewords,
-  abs: abs,
-  atLeast: atLeast,
-  atMost: atMost,
-  ceil: ceil,
-  dividedBy: dividedBy,
-  floor: floor,
-  minus: minus,
-  modulo: modulo,
-  times: times,
-  round: round,
-  plus: plus,
-  sortNatural: sortNatural,
+  t: t,
   imageUrl: imageUrl,
   stylesheetTag: stylesheetTag,
   assetUrl: assetUrl,

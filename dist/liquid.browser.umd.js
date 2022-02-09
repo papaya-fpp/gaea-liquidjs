@@ -2862,7 +2862,7 @@
                         assert(filepath, function () { return "illegal filename \"" + file.getText() + "\":\"" + filepath + "\""; });
                         config = {};
                         try {
-                            _d = ctx.environments.themeConfig || { sections: [] }, sections = _d.sections, settings = __rest(_d, ["sections"]);
+                            _d = ctx.environments.themeConfig || ctx.environments.settings || { sections: [] }, sections = _d.sections, settings = __rest(_d, ["sections"]);
                             config = __assign({}, ctx.environments, { settings: settings });
                         }
                         catch (err) {
@@ -4381,11 +4381,22 @@
 
 
     var builtinFilters = /*#__PURE__*/Object.freeze({
-        t: t,
         escape: escape,
         escapeOnce: escapeOnce,
         newlineToBr: newlineToBr,
         stripHtml: stripHtml,
+        abs: abs,
+        atLeast: atLeast,
+        atMost: atMost,
+        ceil: ceil,
+        dividedBy: dividedBy,
+        floor: floor,
+        minus: minus,
+        modulo: modulo,
+        times: times,
+        round: round,
+        plus: plus,
+        sortNatural: sortNatural,
         urlDecode: urlDecode,
         urlEncode: urlEncode,
         urlEscape: urlEscape,
@@ -4420,18 +4431,7 @@
         replaceFirst: replaceFirst,
         truncate: truncate,
         truncatewords: truncatewords,
-        abs: abs,
-        atLeast: atLeast,
-        atMost: atMost,
-        ceil: ceil,
-        dividedBy: dividedBy,
-        floor: floor,
-        minus: minus,
-        modulo: modulo,
-        times: times,
-        round: round,
-        plus: plus,
-        sortNatural: sortNatural,
+        t: t,
         imageUrl: imageUrl,
         stylesheetTag: stylesheetTag,
         assetUrl: assetUrl,
