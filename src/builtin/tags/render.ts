@@ -50,7 +50,9 @@ export default {
     assert(filepath, () => `illegal filename "${file.getText()}":"${filepath}"`)
     let config = {}
     try {
-      const { sections, ...settings } = ctx.environments.themeConfig || { sections: [] }
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // @ts-ignore
+      const { sections, ...settings } = ctx.environments.themeConfig || ctx.environments.settings || { sections: [] }
       config = {
         ...ctx.environments, settings
       }

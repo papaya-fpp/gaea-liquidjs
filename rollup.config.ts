@@ -24,8 +24,7 @@ const nodeCjs = {
   external: ['path', 'fs'],
   plugins: [typescript({
     tsconfigOverride: {
-      include: [ 'src' ],
-      exclude: [ 'test', 'benchmark' ],
+      exclude: ['test', 'benchmark', 'src'],
       compilerOptions: {
         target: 'ES2017',
         module: 'ES2015'

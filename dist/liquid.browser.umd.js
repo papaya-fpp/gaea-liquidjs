@@ -247,6 +247,9 @@
     function ellipsis(str, N) {
         return str.length > N ? str.substr(0, N - 3) + '...' : str;
     }
+    function isPlainObject(value) {
+        return isObject(value) && !isArray(value) && !isFunction(value);
+    }
     // compare string in case-insensitive way, undefined values to the tail
     function caseInsensitiveCompare(a, b) {
         if (a == null && b == null)
@@ -262,6 +265,25 @@
         if (a > b)
             return 1;
         return 0;
+    }
+    // 将json合并为字符串
+    function joinJsonToStr(json) {
+        var str = '';
+        Object.keys(json).forEach(function (key) {
+            var val = "\"" + json[key] + "\"";
+            // 过滤重复 '" | '"
+            var regVal = val.replace(/"'|'"/g, '"');
+            str += " " + key + "=" + regVal;
+        });
+        return str;
+    }
+    // 获取值，如果不饱和'/" ，按照变量处理，返回 {{ value }}
+    function getLiquidValue(str) {
+        var value = str;
+        if (!/['"]/g.test(str)) {
+            value = "{{ " + str + " }}";
+        }
+        return value;
     }
 
     var Node = /** @class */ (function () {
@@ -411,7 +433,7 @@
     };
     var ThemeDataScope = /** @class */ (function () {
         function ThemeDataScope() {
-            var themeData = localStorage.getItem('themeData');
+            var themeData = window.localStorage.getItem('themeData');
             if (themeData) {
                 this.rootData = JSON.parse(themeData);
             }
@@ -435,7 +457,6 @@
             var themeScope, template;
             return __generator(this, function (_a) {
                 themeScope = new ThemeDataScope();
-                // console.log(themeScope.rootData.filter(i=> i.name==='sections')[0], '-----rd')
                 if (themeScope.rootData) {
                     template = themeScope.getTpl(file);
                     if (template !== undefined) {
@@ -2841,7 +2862,7 @@
                         assert(filepath, function () { return "illegal filename \"" + file.getText() + "\":\"" + filepath + "\""; });
                         config = {};
                         try {
-                            _d = ctx.environments.themeConfig || { sections: [] }, sections = _d.sections, settings = __rest(_d, ["sections"]);
+                            _d = ctx.environments.themeConfig || ctx.environments.settings || { sections: [] }, sections = _d.sections, settings = __rest(_d, ["sections"]);
                             config = __assign({}, ctx.environments, { settings: settings });
                         }
                         catch (err) {
@@ -3413,8 +3434,404 @@
         }
     };
 
+    var echo = {
+        parse: function (tagToken) {
+            var args = " {{ " + tagToken.args + " }} ";
+            this.tokenizer = new Tokenizer(args, this.liquid.options.operatorsTrie);
+        },
+        render: function (ctx, emitter) {
+            var _a, liquid, tokenizer, tokens, templates, templates_1, templates_1_1, tpl, html, err_1, e_1_1;
+            var e_1, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _a = this, liquid = _a.liquid, tokenizer = _a.tokenizer;
+                        tokens = tokenizer.readTopLevelTokens(liquid.options);
+                        templates = liquid.parser.parse(tokens);
+                        _c.label = 1;
+                    case 1:
+                        _c.trys.push([1, 8, 9, 10]);
+                        templates_1 = __values(templates), templates_1_1 = templates_1.next();
+                        _c.label = 2;
+                    case 2:
+                        if (!!templates_1_1.done) return [3 /*break*/, 7];
+                        tpl = templates_1_1.value;
+                        _c.label = 3;
+                    case 3:
+                        _c.trys.push([3, 5, , 6]);
+                        return [4 /*yield*/, tpl.render(ctx, emitter)];
+                    case 4:
+                        html = _c.sent();
+                        html && emitter.write(html);
+                        return [3 /*break*/, 6];
+                    case 5:
+                        err_1 = _c.sent();
+                        console.error('liquid tag parseError', err_1);
+                        return [3 /*break*/, 6];
+                    case 6:
+                        templates_1_1 = templates_1.next();
+                        return [3 /*break*/, 2];
+                    case 7: return [3 /*break*/, 10];
+                    case 8:
+                        e_1_1 = _c.sent();
+                        e_1 = { error: e_1_1 };
+                        return [3 /*break*/, 10];
+                    case 9:
+                        try {
+                            if (templates_1_1 && !templates_1_1.done && (_b = templates_1.return)) _b.call(templates_1);
+                        }
+                        finally { if (e_1) throw e_1.error; }
+                        return [7 /*endfinally*/];
+                    case 10: return [2 /*return*/];
+                }
+            });
+        }
+    };
+
+    /******
+     * 不同类型自定义参数配置
+     * 自定义参数优先级低于标签应用层传入的变量
+     * 自定义参数可以使用环境变量，如 id: '{{ product.id }}-1234'
+     */
+    var formTypeMapper = {
+        product: {
+            action: '/cart/add'
+        }
+    };
+    // 将args解析成 json,并添加form默认属性
+    function parseArgsToFormJson(args) {
+        var argsList = args.split(',').map(function (i) { return i.replace(/\s/g, ''); });
+        var defaultArgsJson = {
+            enctype: 'multipart/form-data',
+            method: 'post',
+            'accept-charset': 'UTF-8',
+            type: ''
+        };
+        if (!argsList.length) {
+            return defaultArgsJson;
+        }
+        var first = argsList[0];
+        // 第一条数据认为是 类型
+        var type = first.replace(/['"]/g, '');
+        var isValidateType = type.indexOf(':') === -1 && !!type;
+        var result = defaultArgsJson;
+        if (isValidateType) {
+            result.type = type;
+            argsList.shift();
+        }
+        result = __assign({}, result, formTypeMapper[type]);
+        argsList.forEach(function (item) {
+            var arr = item.split(':');
+            if (!arr[1])
+                return;
+            result[arr[0]] = getLiquidValue(arr[1]);
+        });
+        return result;
+    }
+    function parseToForm(args) {
+        var argsJson = parseArgsToFormJson(args);
+        var defaultFormStr = "<form " + joinJsonToStr(argsJson) + ">\n    <input type=\"hidden\" value=\"" + (argsJson.type || '') + "\" name=\"form_type\">\n    <input type=\"hidden\" name=\"utf8\" value=\"\u2713\">\n  ";
+        return defaultFormStr;
+    }
+    var form = {
+        parse: function (tagToken, remainTokens) {
+            var _this = this;
+            var tokenizer = new Tokenizer(tagToken.args, this.liquid.options.operatorsTrie);
+            this.variable = readVariableName$1(tokenizer);
+            this.templates = [];
+            var stream = this.liquid.parser.parseStream(remainTokens);
+            this.args = parseToForm(tagToken.args);
+            stream.on('tag:endform', function () { return stream.stop(); })
+                .on('template', function (tpl) {
+                _this.templates.push(tpl);
+            })
+                .on('end', function () {
+                throw new Error("tag " + tagToken.getText() + " not closed");
+            });
+            stream.start();
+        },
+        render: function (ctx, emitter) {
+            var r, html, str;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        r = this.liquid.renderer;
+                        return [4 /*yield*/, r.renderTemplates(this.templates, ctx)];
+                    case 1:
+                        html = _a.sent();
+                        str = "" + this.args + html + "</form>";
+                        return [2 /*return*/, str];
+                }
+            });
+        }
+    };
+    function readVariableName$1(tokenizer) {
+        var word = tokenizer.readIdentifier().content;
+        if (word)
+            return word;
+        var quoted = tokenizer.readQuoted();
+        if (quoted)
+            return evalQuotedToken(quoted);
+    }
+
+    var javascript = {
+        parse: function (tagToken, remainTokens) {
+            var _this = this;
+            var tokenizer = new Tokenizer(tagToken.args, this.liquid.options.operatorsTrie);
+            this.variable = readVariableName$2(tokenizer);
+            this.templates = [];
+            var stream = this.liquid.parser.parseStream(remainTokens);
+            stream.on('tag:endjavascript', function () { return stream.stop(); })
+                .on('template', function (tpl) {
+                _this.templates.push(tpl);
+            })
+                .on('end', function () {
+                throw new Error("tag " + tagToken.getText() + " not closed");
+            });
+            stream.start();
+        },
+        render: function (ctx, emitter) {
+            var r, html, str;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        r = this.liquid.renderer;
+                        return [4 /*yield*/, r.renderTemplates(this.templates, ctx)];
+                    case 1:
+                        html = _a.sent();
+                        str = "<script>\n        window.addEventListener('load',function(){" + html + "})\n    </script>";
+                        return [2 /*return*/, str];
+                }
+            });
+        }
+    };
+    function readVariableName$2(tokenizer) {
+        var word = tokenizer.readIdentifier().content;
+        if (word)
+            return word;
+        var quoted = tokenizer.readQuoted();
+        if (quoted)
+            return evalQuotedToken(quoted);
+    }
+
+    var style = {
+        parse: function (tagToken, remainTokens) {
+            var _this = this;
+            var tokenizer = new Tokenizer(tagToken.args, this.liquid.options.operatorsTrie);
+            this.variable = readVariableName$3(tokenizer);
+            this.templates = [];
+            var stream = this.liquid.parser.parseStream(remainTokens);
+            stream.on('tag:endstyle', function () { return stream.stop(); })
+                .on('template', function (tpl) {
+                _this.templates.push(tpl);
+            })
+                .on('end', function () {
+                throw new Error("tag " + tagToken.getText() + " not closed");
+            });
+            stream.start();
+        },
+        render: function (ctx, emitter) {
+            var r, html, str;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        r = this.liquid.renderer;
+                        return [4 /*yield*/, r.renderTemplates(this.templates, ctx)];
+                    case 1:
+                        html = _a.sent();
+                        str = "<style>\n    " + html + "\n    </style>";
+                        return [2 /*return*/, str];
+                }
+            });
+        }
+    };
+    function readVariableName$3(tokenizer) {
+        var word = tokenizer.readIdentifier().content;
+        if (word)
+            return word;
+        var quoted = tokenizer.readQuoted();
+        if (quoted)
+            return evalQuotedToken(quoted);
+    }
+
+    /**
+     * 自定义 liquid 标签
+     * 方案是在liquid 里面 每行 两边添加 {%  %} 然后重新渲染
+     * 示例：
+     * {%- liquid
+          assign columns = section.blocks.size
+          if columns > 3
+            assign columns = 3
+          endif
+        -%}
+     */
+    // 将liquid标签 转为 两边添加 {%%}
+    function parseLiquidToNormal(args) {
+        var list = args.split(/\n/).map(function (str) {
+            if (/[\S]/g.test(str)) {
+                var trimedStr = str.replace(/(^\s*)|(\s*$)/g, '');
+                return "{% " + trimedStr + " %}";
+            }
+            return '';
+        });
+        var notEmptyList = list.filter(function (item) { return !!item; });
+        return notEmptyList.join(' \n');
+    }
+    var liquid = {
+        parse: function (tagToken) {
+            var args = parseLiquidToNormal(tagToken.args);
+            var tokenizer = new Tokenizer(args, this.liquid.options.operatorsTrie);
+            var tokens = tokenizer.readTopLevelTokens(this.liquid.options);
+            this.templates = this.liquid.parser.parse(tokens);
+            this.key = tokenizer.readIdentifier().content;
+        },
+        render: function (ctx, emitter) {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _a = ctx.bottom();
+                        _b = this.key;
+                        return [4 /*yield*/, this.liquid.renderer.renderTemplates(this.templates, ctx, emitter)];
+                    case 1:
+                        _a[_b] = _c.sent();
+                        return [2 /*return*/];
+                }
+            });
+        }
+    };
+
+    var schema = {
+        parse: function (tagToken, remainTokens) {
+            var _this = this;
+            this.tokens = [];
+            var stream = this.liquid.parser.parseStream(remainTokens);
+            stream
+                .on('token', function (tagToken) {
+                if (tagToken['name'] === 'endschema')
+                    stream.stop();
+                else
+                    _this.tokens.push(tagToken);
+            })
+                .on('end', function () {
+                throw new Error("tag " + tagToken['raw'] + " not closed");
+            });
+            stream.start();
+        },
+        render: function (ctx, emitter) {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, ''];
+            });
+        }
+    };
+
+    var paginate = {
+        parse: function (tagToken, remainTokens) {
+            var _this = this;
+            this.tokens = [];
+            var stream = this.liquid.parser.parseStream(remainTokens);
+            stream
+                .on('token', function (tagToken) {
+                if (tagToken['name'] === 'endpaginate')
+                    stream.stop();
+                else
+                    _this.tokens.push(tagToken);
+            })
+                .on('end', function () {
+                throw new Error("tag " + tagToken['raw'] + " not closed");
+            });
+            stream.start();
+        },
+        render: function (ctx, emitter) {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, ''];
+            });
+        }
+    };
+
+    var transformThemeConfig = function (themeConfig) {
+        if (!themeConfig)
+            return {};
+        var config = JSON.parse(themeConfig);
+        // 将blocks 改为数组
+        Object.keys(config.current.sections).forEach(function (key) {
+            var item = config.current.sections[key];
+            var blocks = [];
+            if (item.blocks) {
+                Object.keys(item.blocks).forEach(function (k) {
+                    blocks.push(item.blocks[k]);
+                });
+            }
+            item.blocks = blocks;
+        });
+        return config;
+    };
+
+    // 不同模块 容器添加默认dom
+    var wrapperMapper = {
+        header: '<div id="shopify-section-header" class="shopify-section" data-shopify-editor-section="{"id":"announcement-bar","type":"announcement-bar","disabled":false}">'
+    };
+    var section = {
+        parse: function (tagToken) {
+            var tokenizer = new Tokenizer(tagToken.args, this.liquid.options.operatorsTrie);
+            this.file = tokenizer.readValue();
+            // const domain = this.liquid.options.root;
+            var themeScope = new ThemeDataScope();
+            this.domainFiles = themeScope.rootData;
+            // console.log(domainFiles[1].data, 'ddd')
+            var settingData = themeScope.getTpl('config/settings_data.json');
+            this.themeConfig = transformThemeConfig(settingData).current;
+            this.hash = new Hash(tokenizer.remaining());
+        },
+        render: function (ctx) {
+            var _a, liquid, file, hash, renderer, _b, sections, settings, filePath, _c, section, scope, childCtx, html;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        _a = this, liquid = _a.liquid, file = _a.file, hash = _a.hash;
+                        renderer = liquid.renderer;
+                        _b = this.themeConfig, sections = _b.sections, settings = __rest(_b, ["sections"]);
+                        if (!isQuotedToken(this.file)) return [3 /*break*/, 2];
+                        return [4 /*yield*/, renderer.renderTemplates(liquid.parse(evalQuotedToken(file)), ctx)];
+                    case 1:
+                        _c = _d.sent();
+                        return [3 /*break*/, 3];
+                    case 2:
+                        _c = evalToken(file, ctx);
+                        _d.label = 3;
+                    case 3:
+                        filePath = _c;
+                        // const templates = getSectionLiquid(this.domainFiles, filePath)
+                        if (filePath.indexOf('sections/') < 0) {
+                            filePath = "sections/" + filePath;
+                        }
+                        section = {};
+                        if (Array.isArray(sections)) {
+                            section = sections && sections.find(function (item) { return item.type === filePath; });
+                        }
+                        else {
+                            section = sections[filePath];
+                        }
+                        return [4 /*yield*/, hash.render(ctx)
+                            // ctx.push(scope)
+                        ];
+                    case 4:
+                        scope = _d.sent();
+                        childCtx = __assign({}, ctx.environments, { section: section, settings: settings }, scope, ctx.globals);
+                        return [4 /*yield*/, this.liquid.renderFile(filePath, childCtx)];
+                    case 5:
+                        html = _d.sent();
+                        if (wrapperMapper[filePath]) {
+                            html = wrapperMapper[filePath] + " " + html + " </div>";
+                        }
+                        return [2 /*return*/, html];
+                }
+            });
+        }
+    };
+
     var tags = {
-        assign: assign, 'for': For, capture: capture, 'case': Case, comment: comment, include: include, render: render, decrement: decrement, increment: increment, cycle: cycle, 'if': If, layout: layout, block: block, raw: raw, tablerow: tablerow, unless: unless, 'break': Break, 'continue': Continue
+        assign: assign, 'for': For, capture: capture, 'case': Case, comment: comment, include: include, render: render, decrement: decrement, increment: increment, cycle: cycle, 'if': If, layout: layout, block: block, raw: raw, tablerow: tablerow, unless: unless, 'break': Break, 'continue': Continue, echo: echo, form: form, javascript: javascript, style: style, section: section, liquid: liquid, schema: schema, paginate: paginate
     };
 
     var escapeMap = {
@@ -3446,6 +3863,10 @@
     function stripHtml(v) {
         return v.replace(/<script.*?<\/script>|<!--.*?-->|<style.*?<\/style>|<.*?>/g, '');
     }
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    // export function strip_html(v: string) {
+    //   return v.replace(/<script.*?<\/script>|<!--.*?-->|<style.*?<\/style>|<.*?>/g, '')
+    // }
 
     var abs = Math.abs;
     var atLeast = Math.max;
@@ -3475,6 +3896,7 @@
 
     var urlDecode = function (x) { return x.split('+').map(decodeURIComponent).join(' '); };
     var urlEncode = function (x) { return x.split(' ').map(encodeURIComponent).join('+'); };
+    var urlEscape = function (x) { return encodeURIComponent(x); };
 
     var join = function (v, arg) { return v.join(arg === undefined ? ' ' : arg); };
     var last$1 = function (v) { return isArray(v) ? last(v) : ''; };
@@ -3828,6 +4250,134 @@
         return ret;
     }
 
+    var quoted = /^'[^']*'|"[^"]*"$/;
+    var currentLanguageJsonObj = {};
+    function getI18nLabel(nameString, currentLanguageJsonObj, args) {
+        // let nameString = 't:sections.image-with-text.settings.image.label'
+        var node = currentLanguageJsonObj;
+        var labelTreeList = nameString.split('.');
+        for (var i = 0; i < labelTreeList.length; i++) {
+            var currentNode = labelTreeList[i];
+            if (node && isPlainObject(node)) {
+                node = node[currentNode];
+            }
+        }
+        /**
+           * 如果使用该 filter 时传入了两个参数，则认为当前翻译中有变量，需要进行变量替换
+           */
+        if (isArray(args) && args.length === 2 && isString(node)) {
+            var _a = __read(args, 2), variableKey = _a[0], variableValue = _a[1];
+            var regexp = new RegExp("{{\\s?" + variableKey + "\\s?}}", 'g');
+            node = node.replace(regexp, variableValue);
+        }
+        return node;
+    }
+    function t(variable, args) {
+        if (quoted.test(variable)) {
+            return variable;
+        }
+        var language = 'zh-CN';
+        var domainFiles = (new ThemeDataScope()).rootData;
+        var locales = domainFiles.filter(function (item) { return item.name === 'locales'; })[0].data;
+        var currentLanguageJson;
+        try {
+            currentLanguageJson = locales.filter(function (item) { return item.name === language + ".json"; })[0].data;
+        }
+        catch (error) {
+            console.log("\u8BE5\u6A21\u677FC\u7AEF\u6CA1\u6709\u9002\u914D\u8BE5\u8BED\u8A00: " + language + ", \u4F7F\u7528\u9ED8\u8BA4\u8BED\u8A00\u5305 en.default.json");
+            currentLanguageJson = locales.filter(function (item) { return item.name === "en.default.json"; })[0].data;
+        }
+        currentLanguageJsonObj = JSON.parse(currentLanguageJson.value);
+        var i18nLabel = getI18nLabel(variable, currentLanguageJsonObj, args);
+        return i18nLabel;
+    }
+
+    function imageUrl(v) {
+        var arg = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            arg[_i - 1] = arguments[_i];
+        }
+        arg.forEach(function (item) {
+            var existQuery = v.indexOf('?') > -1;
+            var prefix = existQuery ? '&' : '?';
+            v += (prefix + item[0] + '=' + item[1]);
+        });
+        return v;
+    }
+
+    function stylesheetTag(href) {
+        return "<link href=\"" + href + "\" rel=\"stylesheet\" type=\"text/css\" media=\"all\">";
+    }
+
+    var getPublicUrlOfAsset = function (array, assetName) {
+        var rst = '';
+        function deep(_array) {
+            if (!_array)
+                return;
+            for (var i = 0; i < _array.length; i++) {
+                if (_array[i].type === 'file' && _array[i].name === assetName) {
+                    rst = _array[i].data.public_url;
+                    break;
+                }
+                if (_array[i].type === 'folder') {
+                    deep(_array[i].data);
+                }
+            }
+        }
+        deep(array);
+        return rst;
+    };
+    function assetUrl(variable) {
+        var domainFiles = (new ThemeDataScope()).rootData;
+        var assetsPublicUrl = getPublicUrlOfAsset(domainFiles, variable);
+        return assetsPublicUrl;
+    }
+
+    function defaultErrors(formErrors) {
+        return "Please enter a valid " + formErrors.error_strings;
+    }
+
+    var toColorString = function (colorObject) {
+        try {
+            var r = colorObject.r, g = colorObject.g, b = colorObject.b, a = colorObject.a;
+            return "rgba(" + r + "," + g + "," + b + "," + a + ")";
+        }
+        catch (error) {
+            return '';
+        }
+    };
+    /**
+     * 自定义 color 过滤器，并将 color 过滤器注册到 Liquid 中，color 过滤器用于颜色转换
+     *
+     * @param {object} Liquid
+     * @see https://liquidjs.com/zh-cn/tutorials/plugins.html
+     */
+    function color(x) {
+        return toColorString(x);
+    }
+
+    /**
+     * 自定义 money_with_currency 过滤器，并将 money_with_currency 过滤器注册到 Liquid 中
+     * money_with_currency 过滤器用于将数值转换为带货币标识的字符串
+     *
+     * @param {object} Liquid
+     * @see https://liquidjs.com/zh-cn/tutorials/plugins.html
+     */
+    function moneyWithCurrency(price) {
+        return "$ " + String(price) + " USD";
+    }
+
+    /**
+     * 自定义 money 过滤器，并将 money 过滤器注册到 Liquid 中
+     * money 过滤器用于将数值转换为不带货币标识的字符串
+     *
+     * @param {object} Liquid
+     * @see https://liquidjs.com/zh-cn/tutorials/plugins.html
+     */
+    function money(price) {
+        return "$ " + String(price);
+    }
+
 
 
     var builtinFilters = /*#__PURE__*/Object.freeze({
@@ -3849,6 +4399,7 @@
         sortNatural: sortNatural,
         urlDecode: urlDecode,
         urlEncode: urlEncode,
+        urlEscape: urlEscape,
         join: join,
         last: last$1,
         first: first,
@@ -3879,7 +4430,15 @@
         replace: replace,
         replaceFirst: replaceFirst,
         truncate: truncate,
-        truncatewords: truncatewords
+        truncatewords: truncatewords,
+        t: t,
+        imageUrl: imageUrl,
+        stylesheetTag: stylesheetTag,
+        assetUrl: assetUrl,
+        defaultErrors: defaultErrors,
+        color: color,
+        moneyWithCurrency: moneyWithCurrency,
+        money: money
     });
 
     var TagMap = /** @class */ (function () {

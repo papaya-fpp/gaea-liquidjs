@@ -24,3 +24,5 @@ export { toPromise, toThenable } from './util/async'
 export { defaultOperators, Operators } from './render/operator'
 export { createTrie, Trie } from './util/operator-trie'
 export { toValue } from './util/underscore'
+// fpp 特有的types
+export { THEME_DIR } from './fs/ThemeDataScope'

@@ -2,17 +2,17 @@
 
 type DOMAIN_THEME_ROOT_DATA = Array <THEME_DIR>
 
-interface THEME_DIR {
+export interface THEME_DIR {
   type: 'folder' | 'file';
   name: string;
-  data: Array<THEME_DIR>;
+  data: Array<THEME_DIR> | THEME__FILE__SCHEMA
 }
 
 interface THEME__FILE__SCHEMA {
-  id: string;
-  public_url: string;
+  id?: string;
+  public_url?: string;
   value: string;
-  checksum: string;
+  checksum?: string;
 }
 
 const pickUniqueTpl = (tplPath: string, rootData: DOMAIN_THEME_ROOT_DATA): string => {
@@ -32,7 +32,7 @@ const pickUniqueTpl = (tplPath: string, rootData: DOMAIN_THEME_ROOT_DATA): strin
           result = data[i]
           break
         } else {
-          findDir(data[i].data, dirName)
+          findDir((data[i].data as THEME_DIR[]), dirName)
         }
       }
     }
@@ -75,7 +75,7 @@ const pickUniqueTpl = (tplPath: string, rootData: DOMAIN_THEME_ROOT_DATA): strin
         // 如果不是最后一个,说明当前索引的是文件夹
         const dir = findDir(currentDir, pathArr[i])
         if (dir) {
-          currentDir = dir.data
+          currentDir = (dir.data as THEME_DIR[])
         }
       }
       if (currentDir) {
@@ -116,7 +116,7 @@ class ThemeDataScope {
   rootData: DOMAIN_THEME_ROOT_DATA;
 
   constructor() {
-    let themeData = localStorage.getItem('themeData')
+    let themeData = window.localStorage.getItem('themeData')
     if (themeData) {
       this.rootData = JSON.parse(themeData)
     } else {
