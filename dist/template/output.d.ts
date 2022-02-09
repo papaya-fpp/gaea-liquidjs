@@ -7,5 +7,5 @@ import { Liquid } from '../liquid';
 export declare class Output extends TemplateImpl<OutputToken> implements Template {
     private value;
     constructor(token: OutputToken, liquid: Liquid);
-    render(ctx: Context, emitter: Emitter): IterableIterator<IterableIterator<any>>;
+    render(ctx: Context, emitter: Emitter): Generator<Generator<any, any, any>, void, unknown>;
 }

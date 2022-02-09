@@ -6,33 +6,35 @@
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
     typeof define === 'function' && define.amd ? define(['exports'], factory) :
-    (global = global || self, factory(global.liquidjs = {}));
-}(this, function (exports) { 'use strict';
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.liquidjs = {}));
+})(this, (function (exports) { 'use strict';
 
     /*! *****************************************************************************
-    Copyright (c) Microsoft Corporation. All rights reserved.
-    Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-    this file except in compliance with the License. You may obtain a copy of the
-    License at http://www.apache.org/licenses/LICENSE-2.0
+    Copyright (c) Microsoft Corporation.
 
-    THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-    KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-    WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-    MERCHANTABLITY OR NON-INFRINGEMENT.
+    Permission to use, copy, modify, and/or distribute this software for any
+    purpose with or without fee is hereby granted.
 
-    See the Apache Version 2.0 License for specific language governing permissions
-    and limitations under the License.
+    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+    REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+    AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+    INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+    LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+    OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+    PERFORMANCE OF THIS SOFTWARE.
     ***************************************************************************** */
     /* global Reflect, Promise */
 
     var extendStatics = function(d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
 
     function __extends(d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -54,16 +56,19 @@
         for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
             t[p] = s[p];
         if (s != null && typeof Object.getOwnPropertySymbols === "function")
-            for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) if (e.indexOf(p[i]) < 0)
-                t[p[i]] = s[p[i]];
+            for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+                if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                    t[p[i]] = s[p[i]];
+            }
         return t;
     }
 
     function __awaiter(thisArg, _arguments, P, generator) {
+        function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
         return new (P || (P = Promise))(function (resolve, reject) {
             function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
             function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-            function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+            function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
             step((generator = generator.apply(thisArg, _arguments || [])).next());
         });
     }
@@ -97,14 +102,15 @@
     }
 
     function __values(o) {
-        var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+        var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
         if (m) return m.call(o);
-        return {
+        if (o && typeof o.length === "number") return {
             next: function () {
                 if (o && i >= o.length) o = void 0;
                 return { value: o && o[i++], done: !o };
             }
         };
+        throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
     }
 
     function __read(o, n) {
@@ -124,10 +130,14 @@
         return ar;
     }
 
-    function __spread() {
-        for (var ar = [], i = 0; i < arguments.length; i++)
-            ar = ar.concat(__read(arguments[i]));
-        return ar;
+    function __spreadArray(to, from, pack) {
+        if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+            if (ar || !(i in from)) {
+                if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+                ar[i] = from[i];
+            }
+        }
+        return to.concat(ar || Array.prototype.slice.call(from));
     }
 
     var Drop = /** @class */ (function () {
@@ -159,10 +169,10 @@
         return typeof value === 'function';
     }
     function stringify(value) {
-        value = toValue(value);
+        value = toValue$1(value);
         return isNil(value) ? '' : String(value);
     }
-    function toValue(value) {
+    function toValue$1(value) {
         return value instanceof Drop ? value.valueOf() : value;
     }
     function isNumber(value) {
@@ -198,7 +208,7 @@
         }
         return object;
     }
-    function last(arr) {
+    function last$1(arr) {
         return arr[arr.length - 1];
     }
     /*
@@ -241,7 +251,7 @@
         return str.replace(/(\w?)([A-Z])/g, function (_, a, b) { return (a ? a + '_' : '') + b.toLowerCase(); });
     }
     function changeCase(str) {
-        var hasLowerCase = __spread(str).some(function (ch) { return ch >= 'a' && ch <= 'z'; });
+        var hasLowerCase = __spreadArray([], __read(str), false).some(function (ch) { return ch >= 'a' && ch <= 'z'; });
         return hasLowerCase ? str.toUpperCase() : str.toLowerCase();
     }
     function ellipsis(str, N) {
@@ -354,8 +364,8 @@
             for (var i = 0; i < __data.length; i++) {
                 if (__data[i].type === 'file') {
                     if (__data[i].name === dirName ||
-                        __data[i].name === dirName + ".liquid" ||
-                        __data[i].name === dirName + ".json") {
+                        __data[i].name === "".concat(dirName, ".liquid") ||
+                        __data[i].name === "".concat(dirName, ".json")) {
                         // 'templates/home' 或者 'templates/home.liquid'
                         // console.log('---layout', __data[i], dirName)
                         result = __data[i].data;
@@ -442,7 +452,7 @@
                         return [2 /*return*/, Promise.resolve(template)];
                     }
                 }
-                return [2 /*return*/, Promise.resolve("\u6CA1\u6709\u4F60\u7684\u6A21\u677F: " + file)];
+                return [2 /*return*/, Promise.resolve("\u6CA1\u6709\u4F60\u7684\u6A21\u677F: ".concat(file))];
             });
         });
     }
@@ -461,6 +471,7 @@
     }
 
     var fs = /*#__PURE__*/Object.freeze({
+        __proto__: null,
         resolve: resolve,
         readFile: readFile,
         readFileSync: readFileSync,
@@ -622,7 +633,7 @@
         return options;
     }
     function applyDefault(options) {
-        return __assign({}, defaultOptions, options);
+        return __assign(__assign({}, defaultOptions), options);
     }
     function normalizeStringArray(value) {
         if (isArray(value))
@@ -701,7 +712,7 @@
     var InternalUndefinedVariableError = /** @class */ (function (_super) {
         __extends(InternalUndefinedVariableError, _super);
         function InternalUndefinedVariableError(variableName) {
-            var _this = _super.call(this, "undefined variable: " + variableName) || this;
+            var _this = _super.call(this, "undefined variable: ".concat(variableName)) || this;
             _this.name = 'InternalUndefinedVariableError';
             _this.variableName = variableName;
             return _this;
@@ -728,16 +739,16 @@
             var indicator = (lineNumber === line) ? '>> ' : '   ';
             var num = padStart(String(lineNumber), String(end).length);
             var text = lines[lineNumber - 1];
-            return "" + indicator + num + "| " + text;
+            return "".concat(indicator).concat(num, "| ").concat(text);
         })
             .join('\n');
         return context;
     }
     function mkMessage(msg, token) {
         if (token.file)
-            msg += ", file:" + token.file;
+            msg += ", file:".concat(token.file);
         var _a = __read(token.getPosition(), 2), line = _a[0], col = _a[1];
-        msg += ", line:" + line + ", col:" + col;
+        msg += ", line:".concat(line, ", col:").concat(col);
         return msg;
     }
 
@@ -776,7 +787,7 @@
             });
         };
         Context.prototype.getAll = function () {
-            return __spread([this.globals, this.environments], this.scopes).reduce(function (ctx, val) { return __assign(ctx, val); }, {});
+            return __spreadArray([this.globals, this.environments], __read(this.scopes), false).reduce(function (ctx, val) { return __assign(ctx, val); }, {});
         };
         Context.prototype.get = function (paths) {
             var scope = this.findScope(paths[0]);
@@ -847,10 +858,10 @@
                     colorChange.push(parseInt('0x' + hexStr.slice(i, i + 2)));
                 }
                 rgba = {
-                    red: "" + colorChange[0],
-                    green: "" + colorChange[1],
-                    blue: "" + colorChange[2],
-                    alpha: "" + 1
+                    red: "".concat(colorChange[0]),
+                    green: "".concat(colorChange[1]),
+                    blue: "".concat(colorChange[2]),
+                    alpha: "".concat(1)
                 };
             }
             return rgba;
@@ -892,6 +903,7 @@
         return obj['size'];
     }
 
+    exports.TokenKind = void 0;
     (function (TokenKind) {
         TokenKind[TokenKind["Number"] = 1] = "Number";
         TokenKind[TokenKind["Literal"] = 2] = "Literal";
@@ -946,6 +958,7 @@
     }
 
     var typeGuards = /*#__PURE__*/Object.freeze({
+        __proto__: null,
         isDelimitedToken: isDelimitedToken,
         isOperatorToken: isOperatorToken,
         isHTMLToken: isHTMLToken,
@@ -1067,7 +1080,7 @@
             return _super !== null && _super.apply(this, arguments) || this;
         }
         NullDrop.prototype.equals = function (value) {
-            return isNil(toValue(value));
+            return isNil(toValue$1(value));
         };
         NullDrop.prototype.gt = function () {
             return false;
@@ -1095,7 +1108,7 @@
         EmptyDrop.prototype.equals = function (value) {
             if (value instanceof EmptyDrop)
                 return false;
-            value = toValue(value);
+            value = toValue$1(value);
             if (isString(value) || isArray(value))
                 return value.length === 0;
             if (isObject(value))
@@ -1128,7 +1141,7 @@
         BlankDrop.prototype.equals = function (value) {
             if (value === false)
                 return true;
-            if (isNil(toValue(value)))
+            if (isNil(toValue$1(value)))
                 return true;
             if (isString(value))
                 return /^\s*$/.test(value);
@@ -1264,7 +1277,7 @@
 
     function assert(predicate, message) {
         if (!predicate) {
-            var msg = message ? message() : "expect " + predicate + " to be true";
+            var msg = message ? message() : "expect ".concat(predicate, " to be true");
             throw new AssertionError(msg);
         }
     }
@@ -1334,7 +1347,7 @@
             _this.trimRight = false;
             _this.content = _this.getText();
             var tl = content[0] === '-';
-            var tr = last(content) === '-';
+            var tr = last$1(content) === '-';
             _this.content = content
                 .slice(tl ? 1 : 0, tr ? -1 : content.length)
                 .trim();
@@ -1409,7 +1422,7 @@
 
     var Expression = /** @class */ (function () {
         function Expression(tokens) {
-            this.postfix = __spread(toPostfix(tokens));
+            this.postfix = __spreadArray([], __read(toPostfix(tokens)), false);
         }
         Expression.prototype.evaluate = function (ctx, lenient) {
             var operands, _a, _b, token, r, l, result, _c, _d, e_1_1;
@@ -1482,7 +1495,7 @@
         var variable = token.getVariableAsText();
         var props = token.props.map(function (prop) { return evalToken(prop, ctx, false); });
         try {
-            return ctx.get(__spread([variable], props));
+            return ctx.get(__spreadArray([variable], __read(props), false));
         }
         catch (e) {
             if (lenient && e.name === 'InternalUndefinedVariableError')
@@ -1629,7 +1642,7 @@
             this.skipBlank();
             if (this.end())
                 return null;
-            assert(this.peek() === '|', function () { return "unexpected token at " + _this.snapshot(); });
+            assert(this.peek() === '|', function () { return "unexpected token at ".concat(_this.snapshot()); });
             this.p++;
             var begin = this.p;
             var name = this.readIdentifier();
@@ -1696,7 +1709,7 @@
             var _a = this, file = _a.file, input = _a.input;
             var begin = this.p;
             if (this.readToDelimiter(options.tagDelimiterRight) === -1) {
-                throw this.mkError("tag " + this.snapshot(begin) + " not closed", begin);
+                throw this.mkError("tag ".concat(this.snapshot(begin), " not closed"), begin);
             }
             var token = new TagToken(input, begin, this.p, options, file);
             if (token.name === 'raw')
@@ -1721,7 +1734,7 @@
             var outputDelimiterRight = options.outputDelimiterRight;
             var begin = this.p;
             if (this.readToDelimiter(outputDelimiterRight) === -1) {
-                throw this.mkError("output " + this.snapshot(begin) + " not closed", begin);
+                throw this.mkError("output ".concat(this.snapshot(begin), " not closed"), begin);
             }
             return new OutputToken(input, begin, this.p, options, file);
         };
@@ -1751,7 +1764,7 @@
                     this.p++;
                 }
             }
-            throw this.mkError("raw " + this.snapshot(this.rawBeginAt) + " not closed", begin);
+            throw this.mkError("raw ".concat(this.snapshot(this.rawBeginAt), " not closed"), begin);
         };
         Tokenizer.prototype.mkError = function (msg, begin) {
             return new TokenizationError(msg, new IdentifierToken(this.input, begin, this.N, this.file));
@@ -1878,7 +1891,7 @@
         Tokenizer.prototype.readValueOrThrow = function () {
             var _this = this;
             var value = this.readValue();
-            assert(value, function () { return "unexpected token " + _this.snapshot() + ", value expected"; });
+            assert(value, function () { return "unexpected token ".concat(_this.snapshot(), ", value expected"); });
             return value;
         };
         Tokenizer.prototype.readQuoted = function () {
@@ -1944,10 +1957,10 @@
         }
         Emitter.prototype.write = function (html) {
             if (this.keepOutputType === true) {
-                html = toValue(html);
+                html = toValue$1(html);
             }
             else {
-                html = stringify(toValue(html));
+                html = stringify(toValue$1(html));
             }
             // This will only preserve the type if the value is isolated.
             // I.E:
@@ -2039,7 +2052,7 @@
             while (!this.stopRequested && (token = this.tokens.shift())) {
                 if (this.trigger('token', token))
                     continue;
-                if (isTagToken(token) && this.trigger("tag:" + token.name, token)) {
+                if (isTagToken(token) && this.trigger("tag:".concat(token.name), token)) {
                     continue;
                 }
                 var template = this.parseToken(token, this.tokens);
@@ -2162,7 +2175,7 @@
                 }
                 finally { if (e_1) throw e_1.error; }
             }
-            return this.impl.apply({ context: context, liquid: this.liquid }, __spread([value], argv));
+            return this.impl.apply({ context: context, liquid: this.liquid }, __spreadArray([value], __read(argv), false));
         };
         return Filter;
     }());
@@ -2282,7 +2295,7 @@
         return Promise.resolve(toThenable(val));
     }
     // get the value of async iterator in synchronous manner
-    function toValue$1(val) {
+    function toValue(val) {
         var ret;
         toThenable(val)
             .then(function (x) {
@@ -2402,7 +2415,7 @@
             var tokenizer = new Tokenizer(token.args, this.liquid.options.operatorsTrie);
             this.key = tokenizer.readIdentifier().content;
             tokenizer.skipBlank();
-            assert(tokenizer.peek() === '=', function () { return "illegal token " + token.getText(); });
+            assert(tokenizer.peek() === '=', function () { return "illegal token ".concat(token.getText()); });
             tokenizer.advance();
             this.value = tokenizer.remaining();
         },
@@ -2480,7 +2493,7 @@
             var variable = toknenizer.readIdentifier();
             var inStr = toknenizer.readIdentifier();
             var collection = toknenizer.readValue();
-            assert(variable.size() && inStr.content === 'in' && collection, function () { return "illegal tag: " + token.getText(); });
+            assert(variable.size() && inStr.content === 'in' && collection, function () { return "illegal tag: ".concat(token.getText()); });
             this.variable = variable.content;
             this.collection = collection;
             this.hash = new Hash(toknenizer.remaining());
@@ -2493,7 +2506,7 @@
                 .on('tag:endfor', function () { return stream.stop(); })
                 .on('template', function (tpl) { return p.push(tpl); })
                 .on('end', function () {
-                throw new Error("tag " + token.getText() + " not closed");
+                throw new Error("tag ".concat(token.getText(), " not closed"));
             });
             stream.start();
         },
@@ -2569,13 +2582,13 @@
             var _this = this;
             var tokenizer = new Tokenizer(tagToken.args, this.liquid.options.operatorsTrie);
             this.variable = readVariableName(tokenizer);
-            assert(this.variable, function () { return tagToken.args + " not valid identifier"; });
+            assert(this.variable, function () { return "".concat(tagToken.args, " not valid identifier"); });
             this.templates = [];
             var stream = this.liquid.parser.parseStream(remainTokens);
             stream.on('tag:endcapture', function () { return stream.stop(); })
                 .on('template', function (tpl) { return _this.templates.push(tpl); })
                 .on('end', function () {
-                throw new Error("tag " + tagToken.getText() + " not closed");
+                throw new Error("tag ".concat(tagToken.getText(), " not closed"));
             });
             stream.start();
         },
@@ -2629,7 +2642,7 @@
                 .on('tag:endcase', function () { return stream.stop(); })
                 .on('template', function (tpl) { return p.push(tpl); })
                 .on('end', function () {
-                throw new Error("tag " + tagToken.getText() + " not closed");
+                throw new Error("tag ".concat(tagToken.getText(), " not closed"));
             });
             stream.start();
         },
@@ -2640,7 +2653,7 @@
                 switch (_e.label) {
                     case 0:
                         r = this.liquid.renderer;
-                        _a = toValue;
+                        _a = toValue$1;
                         return [4 /*yield*/, this.cond.value(ctx, ctx.opts.lenientIf)];
                     case 1:
                         cond = _a.apply(void 0, [_e.sent()]);
@@ -2690,7 +2703,7 @@
                     stream.stop();
             })
                 .on('end', function () {
-                throw new Error("tag " + tagToken.getText() + " not closed");
+                throw new Error("tag ".concat(tagToken.getText(), " not closed"));
             });
             stream.start();
         }
@@ -2712,7 +2725,7 @@
             this.file = this.liquid.options.dynamicPartials
                 ? tokenizer.readValue()
                 : tokenizer.readFileName();
-            assert(this.file, function () { return "illegal argument \"" + token.args + "\""; });
+            assert(this.file, function () { return "illegal argument \"".concat(token.args, "\""); });
             var begin = tokenizer.p;
             var withStr = tokenizer.readIdentifier();
             if (withStr.content === 'with') {
@@ -2752,7 +2765,7 @@
                         _d.label = 6;
                     case 6:
                         filepath = _b;
-                        assert(filepath, function () { return "illegal filename \"" + file.getText() + "\":\"" + filepath + "\""; });
+                        assert(filepath, function () { return "illegal filename \"".concat(file.getText(), "\":\"").concat(filepath, "\""); });
                         saved = ctx.saveRegister('blocks', 'blockMode');
                         ctx.setRegister('blocks', {});
                         ctx.setRegister('blockMode', BlockMode$1.OUTPUT);
@@ -2783,7 +2796,7 @@
             this.file = this.liquid.options.dynamicPartials
                 ? tokenizer.readValue()
                 : tokenizer.readFileName();
-            assert(this.file, function () { return "illegal argument \"" + token.args + "\""; });
+            assert(this.file, function () { return "illegal argument \"".concat(token.args, "\""); });
             while (!tokenizer.end()) {
                 tokenizer.skipBlank();
                 var begin = tokenizer.p;
@@ -2838,11 +2851,11 @@
                         _h.label = 5;
                     case 5:
                         filepath = _b;
-                        assert(filepath, function () { return "illegal filename \"" + file.getText() + "\":\"" + filepath + "\""; });
+                        assert(filepath, function () { return "illegal filename \"".concat(file.getText(), "\":\"").concat(filepath, "\""); });
                         config = {};
                         try {
                             _d = ctx.environments.themeConfig || { sections: [] }, sections = _d.sections, settings = __rest(_d, ["sections"]);
-                            config = __assign({}, ctx.environments, { settings: settings });
+                            config = __assign(__assign({}, ctx.environments), { settings: settings });
                         }
                         catch (err) {
                             console.error('ctx.environments.themeConfig 解构失败', err);
@@ -2940,11 +2953,11 @@
                     this.candidates.push(value);
                 tokenizer.readTo(',');
             }
-            assert(this.candidates.length, function () { return "empty candidates: " + tagToken.getText(); });
+            assert(this.candidates.length, function () { return "empty candidates: ".concat(tagToken.getText()); });
         },
         render: function (ctx, emitter) {
             var group = evalToken(this.group, ctx);
-            var fingerprint = "cycle:" + group + ":" + this.candidates.join(',');
+            var fingerprint = "cycle:".concat(group, ":") + this.candidates.join(',');
             var groups = ctx.getRegister('cycle');
             var idx = groups[fingerprint];
             if (idx === undefined) {
@@ -2981,7 +2994,7 @@
                 .on('tag:endif-', function () { return stream.stop(); })
                 .on('template', function (tpl) { return p.push(tpl); })
                 .on('end', function () {
-                throw new Error("tag " + tagToken.getText() + " not closed");
+                throw new Error("tag ".concat(tagToken.getText(), " not closed"));
             });
             stream.start();
         },
@@ -3051,7 +3064,7 @@
         parse: function (token, remainTokens) {
             var tokenizer = new Tokenizer(token.args, this.liquid.options.operatorsTrie);
             var file = this.liquid.options.dynamicPartials ? tokenizer.readValue() : tokenizer.readFileName();
-            assert(file, function () { return "illegal argument \"" + token.args + "\""; });
+            assert(file, function () { return "illegal argument \"".concat(token.args, "\""); });
             this.file = file;
             this.hash = new Hash(tokenizer.remaining());
             this.tpls = this.liquid.parser.parse(remainTokens);
@@ -3088,7 +3101,7 @@
                         _f.label = 7;
                     case 7:
                         filepath = _b;
-                        assert(filepath, function () { return "file \"" + file.getText() + "\"(\"" + filepath + "\") not available"; });
+                        assert(filepath, function () { return "file \"".concat(file.getText(), "\"(\"").concat(filepath, "\") not available"); });
                         return [4 /*yield*/, liquid._parseFile(filepath, ctx.opts, ctx.sync)
                             // render remaining contents and store rendered results
                         ];
@@ -3146,7 +3159,7 @@
                 .on('tag:endblock', function () { return stream.stop(); })
                 .on('template', function (tpl) { return _this.tpls.push(tpl); })
                 .on('end', function () {
-                throw new Error("tag " + token.getText() + " not closed");
+                throw new Error("tag ".concat(token.getText(), " not closed"));
             });
             stream.start();
         },
@@ -3217,7 +3230,7 @@
                     _this.tokens.push(token);
             })
                 .on('end', function () {
-                throw new Error("tag " + tagToken.getText() + " not closed");
+                throw new Error("tag ".concat(tagToken.getText(), " not closed"));
             });
             stream.start();
         },
@@ -3259,7 +3272,7 @@
             this.variable = tokenizer.readIdentifier();
             tokenizer.skipBlank();
             var tmp = tokenizer.readIdentifier();
-            assert(tmp && tmp.content === 'in', function () { return "illegal tag: " + tagToken.getText(); });
+            assert(tmp && tmp.content === 'in', function () { return "illegal tag: ".concat(tagToken.getText()); });
             this.collection = tokenizer.readValue();
             this.hash = new Hash(tokenizer.remaining());
             this.templates = [];
@@ -3269,7 +3282,7 @@
                 .on('tag:endtablerow', function () { return stream.stop(); })
                 .on('template', function (tpl) { return p.push(tpl); })
                 .on('end', function () {
-                throw new Error("tag " + tagToken.getText() + " not closed");
+                throw new Error("tag ".concat(tagToken.getText(), " not closed"));
             });
             stream.start();
         },
@@ -3301,9 +3314,9 @@
                         if (tablerowloop.col0() === 0) {
                             if (tablerowloop.row() !== 1)
                                 emitter.write('</tr>');
-                            emitter.write("<tr class=\"row" + tablerowloop.row() + "\">");
+                            emitter.write("<tr class=\"row".concat(tablerowloop.row(), "\">"));
                         }
-                        emitter.write("<td class=\"col" + tablerowloop.col() + "\">");
+                        emitter.write("<td class=\"col".concat(tablerowloop.col(), "\">"));
                         return [4 /*yield*/, r.renderTemplates(this.templates, ctx, emitter)];
                     case 4:
                         _b.sent();
@@ -3344,7 +3357,7 @@
                 .on('tag:endunless', function () { return stream.stop(); })
                 .on('template', function (tpl) { return p.push(tpl); })
                 .on('end', function () {
-                throw new Error("tag " + tagToken.getText() + " not closed");
+                throw new Error("tag ".concat(tagToken.getText(), " not closed"));
             });
             stream.start();
         },
@@ -3414,7 +3427,23 @@
     };
 
     var tags = {
-        assign: assign, 'for': For, capture: capture, 'case': Case, comment: comment, include: include, render: render, decrement: decrement, increment: increment, cycle: cycle, 'if': If, layout: layout, block: block, raw: raw, tablerow: tablerow, unless: unless, 'break': Break, 'continue': Continue
+        assign: assign,
+        'for': For,
+        capture: capture,
+        'case': Case,
+        comment: comment,
+        include: include,
+        render: render,
+        decrement: decrement,
+        increment: increment,
+        cycle: cycle,
+        'if': If,
+        layout: layout,
+        block: block,
+        raw: raw,
+        tablerow: tablerow,
+        unless: unless,
+        'break': Break, 'continue': Continue
     };
 
     var escapeMap = {
@@ -3468,18 +3497,18 @@
         if (!input || !input.sort)
             return [];
         if (property !== undefined) {
-            return __spread(input).sort(function (lhs, rhs) { return caseInsensitiveCompare(lhs[property], rhs[property]); });
+            return __spreadArray([], __read(input), false).sort(function (lhs, rhs) { return caseInsensitiveCompare(lhs[property], rhs[property]); });
         }
-        return __spread(input).sort(caseInsensitiveCompare);
+        return __spreadArray([], __read(input), false).sort(caseInsensitiveCompare);
     }
 
     var urlDecode = function (x) { return x.split('+').map(decodeURIComponent).join(' '); };
     var urlEncode = function (x) { return x.split(' ').map(encodeURIComponent).join('+'); };
 
     var join = function (v, arg) { return v.join(arg === undefined ? ' ' : arg); };
-    var last$1 = function (v) { return isArray(v) ? last(v) : ''; };
+    var last = function (v) { return isArray(v) ? last$1(v) : ''; };
     var first = function (v) { return isArray(v) ? v[0] : ''; };
-    var reverse = function (v) { return __spread(v).reverse(); };
+    var reverse = function (v) { return __spreadArray([], __read(v), false).reverse(); };
     function sort(arr, property) {
         var _this = this;
         var getValue = function (obj) { return property ? _this.context.getFromScope(obj, property.split('.')) : obj; };
@@ -3754,7 +3783,7 @@
     function Default(v, arg) {
         if (isArray(v) || isString(v))
             return v.length ? v : arg;
-        return isFalsy(toValue(v), this.context) ? arg : v;
+        return isFalsy(toValue$1(v), this.context) ? arg : v;
     }
     function json(v) {
         return JSON.stringify(v);
@@ -3828,9 +3857,8 @@
         return ret;
     }
 
-
-
     var builtinFilters = /*#__PURE__*/Object.freeze({
+        __proto__: null,
         escape: escape,
         escapeOnce: escapeOnce,
         newlineToBr: newlineToBr,
@@ -3850,7 +3878,7 @@
         urlDecode: urlDecode,
         urlEncode: urlEncode,
         join: join,
-        last: last$1,
+        last: last,
         first: first,
         reverse: reverse,
         sort: sort,
@@ -3888,7 +3916,7 @@
         }
         TagMap.prototype.get = function (name) {
             var impl = this.impls[name];
-            assert(impl, function () { return "tag \"" + name + "\" not found"; });
+            assert(impl, function () { return "tag \"".concat(name, "\" not found"); });
             return impl;
         };
         TagMap.prototype.set = function (name, impl) {
@@ -3905,7 +3933,7 @@
         }
         FilterMap.prototype.get = function (name) {
             var impl = this.impls[name];
-            assert(impl || !this.strictFilters, function () { return "undefined filter: " + name; });
+            assert(impl || !this.strictFilters, function () { return "undefined filter: ".concat(name); });
             return impl;
         };
         FilterMap.prototype.set = function (name, impl) {
@@ -3935,7 +3963,7 @@
             return this.parser.parse(tokens);
         };
         Liquid.prototype._render = function (tpl, scope, opts, sync) {
-            var options = __assign({}, this.options, normalize(opts));
+            var options = __assign(__assign({}, this.options), normalize(opts));
             var ctx = new Context(scope, options, sync);
             var emitter = new Emitter(options.keepOutputType);
             return this.renderer.renderTemplates(tpl, ctx, emitter);
@@ -3948,7 +3976,7 @@
             });
         };
         Liquid.prototype.renderSync = function (tpl, scope, opts) {
-            return toValue$1(this._render(tpl, scope, opts, true));
+            return toValue(this._render(tpl, scope, opts, true));
         };
         Liquid.prototype._parseAndRender = function (html, scope, opts, sync) {
             var tpl = this.parse(html);
@@ -3962,7 +3990,7 @@
             });
         };
         Liquid.prototype.parseAndRenderSync = function (html, scope, opts) {
-            return toValue$1(this._parseAndRender(html, scope, opts, true));
+            return toValue(this._parseAndRender(html, scope, opts, true));
         };
         Liquid.prototype._parseFile = function (file, opts, sync) {
             var options, paths, filepath, paths_1, paths_1_1, filepath, cache, tpls, _a, tpl, _b, _c, e_1_1;
@@ -3970,7 +3998,7 @@
             return __generator(this, function (_e) {
                 switch (_e.label) {
                     case 0:
-                        options = __assign({}, this.options, normalize(opts));
+                        options = __assign(__assign({}, this.options), normalize(opts));
                         paths = options.root.map(function (root) { return options.fs.resolve(root, file, options.extname); });
                         if (options.fs.fallback !== undefined) {
                             filepath = options.fs.fallback(file);
@@ -4043,7 +4071,7 @@
             });
         };
         Liquid.prototype.parseFileSync = function (file, opts) {
-            return toValue$1(this._parseFile(file, opts, true));
+            return toValue(this._parseFile(file, opts, true));
         };
         Liquid.prototype.renderFile = function (file, ctx, opts) {
             return __awaiter(this, void 0, void 0, function () {
@@ -4074,7 +4102,7 @@
             });
         };
         Liquid.prototype.evalValueSync = function (str, ctx) {
-            return toValue$1(this._evalValue(str, ctx));
+            return toValue(this._evalValue(str, ctx));
         };
         Liquid.prototype.registerFilter = function (name, filter) {
             this.filters.set(name, filter);
@@ -4088,13 +4116,13 @@
         Liquid.prototype.express = function () {
             var self = this; // eslint-disable-line
             return function (filePath, ctx, callback) {
-                var opts = { root: __spread(normalizeStringArray(this.root), self.options.root) };
+                var opts = { root: __spreadArray(__spreadArray([], __read(normalizeStringArray(this.root)), false), __read(self.options.root), false) };
                 self.renderFile(filePath, ctx, opts).then(function (html) { return callback(null, html); }, callback);
             };
         };
         Liquid.prototype.lookupError = function (file, roots) {
             var err = new Error('ENOENT');
-            err.message = "ENOENT: Failed to lookup \"" + file + "\" in \"" + roots + "\"";
+            err.message = "ENOENT: Failed to lookup \"".concat(file, "\" in \"").concat(roots, "\"");
             err.code = 'ENOENT';
             return err;
         };
@@ -4145,7 +4173,7 @@
     exports.isTruthy = isTruthy;
     exports.toPromise = toPromise;
     exports.toThenable = toThenable;
-    exports.toValue = toValue;
+    exports.toValue = toValue$1;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 

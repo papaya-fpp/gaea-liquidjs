@@ -9,5 +9,5 @@ export declare class Value {
      * @param str the value to be valuated, eg.: "foobar" | truncate: 3
      */
     constructor(str: string, liquid: Liquid);
-    value(ctx: Context, lenient: boolean): IterableIterator<any>;
+    value(ctx: Context, lenient: boolean): Generator<any, any, any>;
 }

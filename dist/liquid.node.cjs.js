@@ -23,18 +23,18 @@ class Drop {
 }
 
 /*! *****************************************************************************
-Copyright (c) Microsoft Corporation. All rights reserved.
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-this file except in compliance with the License. You may obtain a copy of the
-License at http://www.apache.org/licenses/LICENSE-2.0
+Copyright (c) Microsoft Corporation.
 
-THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-MERCHANTABLITY OR NON-INFRINGEMENT.
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted.
 
-See the Apache Version 2.0 License for specific language governing permissions
-and limitations under the License.
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
 ***************************************************************************** */
 
 var __assign = function() {
@@ -53,8 +53,10 @@ function __rest(s, e) {
     for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
         t[p] = s[p];
     if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) if (e.indexOf(p[i]) < 0)
-            t[p[i]] = s[p[i]];
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
     return t;
 }
 
@@ -81,10 +83,10 @@ function promisify(fn) {
     };
 }
 function stringify(value) {
-    value = toValue(value);
+    value = toValue$1(value);
     return isNil(value) ? '' : String(value);
 }
-function toValue(value) {
+function toValue$1(value) {
     return value instanceof Drop ? value.valueOf() : value;
 }
 function isNumber(value) {
@@ -120,7 +122,7 @@ function forOwn(object, iteratee) {
     }
     return object;
 }
-function last(arr) {
+function last$1(arr) {
     return arr[arr.length - 1];
 }
 /*
@@ -241,6 +243,7 @@ class LRU {
     }
 }
 
+// @ts-nocheck
 const statAsync = promisify(fs$1.stat);
 const readFileAsync = promisify(fs$1.readFile);
 function exists(filepath) {
@@ -274,6 +277,7 @@ function fallback(file) {
 }
 
 var fs = /*#__PURE__*/Object.freeze({
+  __proto__: null,
   exists: exists,
   readFile: readFile,
   existsSync: existsSync,
@@ -425,7 +429,7 @@ function normalize(options) {
     return options;
 }
 function applyDefault(options) {
-    return Object.assign({}, defaultOptions, options);
+    return Object.assign(Object.assign({}, defaultOptions), options);
 }
 function normalizeStringArray(value) {
     if (isArray(value))
@@ -660,6 +664,7 @@ function readSize(obj) {
     return obj['size'];
 }
 
+exports.TokenKind = void 0;
 (function (TokenKind) {
     TokenKind[TokenKind["Number"] = 1] = "Number";
     TokenKind[TokenKind["Literal"] = 2] = "Literal";
@@ -714,6 +719,7 @@ function getKind(val) {
 }
 
 var typeGuards = /*#__PURE__*/Object.freeze({
+  __proto__: null,
   isDelimitedToken: isDelimitedToken,
   isOperatorToken: isOperatorToken,
   isHTMLToken: isHTMLToken,
@@ -823,7 +829,7 @@ class IdentifierToken extends Token {
 
 class NullDrop extends Drop {
     equals(value) {
-        return isNil(toValue(value));
+        return isNil(toValue$1(value));
     }
     gt() {
         return false;
@@ -846,7 +852,7 @@ class EmptyDrop extends Drop {
     equals(value) {
         if (value instanceof EmptyDrop)
             return false;
-        value = toValue(value);
+        value = toValue$1(value);
         if (isString(value) || isArray(value))
             return value.length === 0;
         if (isObject(value))
@@ -874,7 +880,7 @@ class BlankDrop extends EmptyDrop {
     equals(value) {
         if (value === false)
             return true;
-        if (isNil(toValue(value)))
+        if (isNil(toValue$1(value)))
             return true;
         if (isString(value))
             return /^\s*$/.test(value);
@@ -1057,7 +1063,7 @@ class DelimitedToken extends Token {
         this.trimRight = false;
         this.content = this.getText();
         const tl = content[0] === '-';
-        const tr = last(content) === '-';
+        const tr = last$1(content) === '-';
         this.content = content
             .slice(tl ? 1 : 0, tr ? -1 : content.length)
             .trim();
@@ -1553,10 +1559,10 @@ class Emitter {
     }
     write(html) {
         if (this.keepOutputType === true) {
-            html = toValue(html);
+            html = toValue$1(html);
         }
         else {
-            html = stringify(toValue(html));
+            html = stringify(toValue$1(html));
         }
         // This will only preserve the type if the value is isolated.
         // I.E:
@@ -1762,7 +1768,7 @@ function toPromise(val) {
     return Promise.resolve(toThenable(val));
 }
 // get the value of async iterator in synchronous manner
-function toValue$1(val) {
+function toValue(val) {
     let ret;
     toThenable(val)
         .then((x) => {
@@ -2020,7 +2026,7 @@ var Case = {
     },
     render: function* (ctx, emitter) {
         const r = this.liquid.renderer;
-        const cond = toValue(yield this.cond.value(ctx, ctx.opts.lenientIf));
+        const cond = toValue$1(yield this.cond.value(ctx, ctx.opts.lenientIf));
         for (const branch of this.cases) {
             const val = evalToken(branch.val, ctx, ctx.opts.lenientIf);
             if (val === cond) {
@@ -2151,7 +2157,7 @@ var render = {
         let config = {};
         try {
             const _a = ctx.environments.themeConfig || { sections: [] }, { sections } = _a, settings = __rest(_a, ["sections"]);
-            config = Object.assign({}, ctx.environments, { settings });
+            config = Object.assign(Object.assign({}, ctx.environments), { settings });
         }
         catch (err) {
             console.error('ctx.environments.themeConfig 解构失败', err);
@@ -2341,6 +2347,7 @@ class BlockDrop extends Drop {
     }
 }
 
+// @ts-nocheck
 var block = {
     parse(token, remainTokens) {
         const match = /\w+/.exec(token.args);
@@ -2591,7 +2598,7 @@ const urlDecode = (x) => x.split('+').map(decodeURIComponent).join(' ');
 const urlEncode = (x) => x.split(' ').map(encodeURIComponent).join('+');
 
 const join = (v, arg) => v.join(arg === undefined ? ' ' : arg);
-const last$1 = (v) => isArray(v) ? last(v) : '';
+const last = (v) => isArray(v) ? last$1(v) : '';
 const first = (v) => isArray(v) ? v[0] : '';
 const reverse = (v) => [...v].reverse();
 function sort(arr, property) {
@@ -2849,7 +2856,7 @@ function isValidDate(date) {
 function Default(v, arg) {
     if (isArray(v) || isString(v))
         return v.length ? v : arg;
-    return isFalsy(toValue(v), this.context) ? arg : v;
+    return isFalsy(toValue$1(v), this.context) ? arg : v;
 }
 function json(v) {
     return JSON.stringify(v);
@@ -2919,9 +2926,8 @@ function truncatewords(v, l = 15, o = '...') {
     return ret;
 }
 
-
-
 var builtinFilters = /*#__PURE__*/Object.freeze({
+  __proto__: null,
   escape: escape,
   escapeOnce: escapeOnce,
   newlineToBr: newlineToBr,
@@ -2941,7 +2947,7 @@ var builtinFilters = /*#__PURE__*/Object.freeze({
   urlDecode: urlDecode,
   urlEncode: urlEncode,
   join: join,
-  last: last$1,
+  last: last,
   first: first,
   reverse: reverse,
   sort: sort,
@@ -3022,7 +3028,7 @@ class Liquid {
         return this.parser.parse(tokens);
     }
     _render(tpl, scope, opts, sync) {
-        const options = Object.assign({}, this.options, normalize(opts));
+        const options = Object.assign(Object.assign({}, this.options), normalize(opts));
         const ctx = new Context(scope, options, sync);
         const emitter = new Emitter(options.keepOutputType);
         return this.renderer.renderTemplates(tpl, ctx, emitter);
@@ -3031,7 +3037,7 @@ class Liquid {
         return toPromise(this._render(tpl, scope, opts, false));
     }
     renderSync(tpl, scope, opts) {
-        return toValue$1(this._render(tpl, scope, opts, true));
+        return toValue(this._render(tpl, scope, opts, true));
     }
     _parseAndRender(html, scope, opts, sync) {
         const tpl = this.parse(html);
@@ -3041,10 +3047,10 @@ class Liquid {
         return toPromise(this._parseAndRender(html, scope, opts, false));
     }
     parseAndRenderSync(html, scope, opts) {
-        return toValue$1(this._parseAndRender(html, scope, opts, true));
+        return toValue(this._parseAndRender(html, scope, opts, true));
     }
     *_parseFile(file, opts, sync) {
-        const options = Object.assign({}, this.options, normalize(opts));
+        const options = Object.assign(Object.assign({}, this.options), normalize(opts));
         const paths = options.root.map(root => options.fs.resolve(root, file, options.extname));
         if (options.fs.fallback !== undefined) {
             const filepath = options.fs.fallback(file);
@@ -3071,7 +3077,7 @@ class Liquid {
         return toPromise(this._parseFile(file, opts, false));
     }
     parseFileSync(file, opts) {
-        return toValue$1(this._parseFile(file, opts, true));
+        return toValue(this._parseFile(file, opts, true));
     }
     async renderFile(file, ctx, opts) {
         const templates = await this.parseFile(file, opts);
@@ -3089,7 +3095,7 @@ class Liquid {
         return toPromise(this._evalValue(str, ctx));
     }
     evalValueSync(str, ctx) {
-        return toValue$1(this._evalValue(str, ctx));
+        return toValue(this._evalValue(str, ctx));
     }
     registerFilter(name, filter) {
         this.filters.set(name, filter);
@@ -3155,4 +3161,4 @@ exports.isFalsy = isFalsy;
 exports.isTruthy = isTruthy;
 exports.toPromise = toPromise;
 exports.toThenable = toThenable;
-exports.toValue = toValue;
+exports.toValue = toValue$1;

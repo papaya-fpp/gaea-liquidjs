@@ -6,5 +6,5 @@ export declare class NullDrop extends Drop implements Comparable {
     geq(): boolean;
     lt(): boolean;
     leq(): boolean;
-    valueOf(): null;
+    valueOf(): any;
 }

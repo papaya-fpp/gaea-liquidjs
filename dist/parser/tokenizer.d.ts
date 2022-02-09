@@ -43,7 +43,7 @@ export declare class Tokenizer {
      */
     readWord(): IdentifierToken;
     readIdentifier(): IdentifierToken;
-    readHashes(): HashToken[];
+    readHashes(): any[];
     readHash(): HashToken | undefined;
     remaining(): string;
     advance(i?: number): void;

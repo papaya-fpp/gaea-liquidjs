@@ -4,8 +4,8 @@ export declare abstract class Token {
     input: string;
     begin: number;
     end: number;
-    file?: string | undefined;
-    constructor(kind: TokenKind, input: string, begin: number, end: number, file?: string | undefined);
+    file?: string;
+    constructor(kind: TokenKind, input: string, begin: number, end: number, file?: string);
     getText(): string;
     getPosition(): number[];
     size(): number;

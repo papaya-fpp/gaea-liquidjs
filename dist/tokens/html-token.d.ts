@@ -3,9 +3,9 @@ export declare class HTMLToken extends Token {
     input: string;
     begin: number;
     end: number;
-    file?: string | undefined;
+    file?: string;
     trimLeft: number;
     trimRight: number;
-    constructor(input: string, begin: number, end: number, file?: string | undefined);
+    constructor(input: string, begin: number, end: number, file?: string);
     getContent(): string;
 }

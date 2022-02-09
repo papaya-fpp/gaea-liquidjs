@@ -5,5 +5,5 @@ export declare class Tag extends TemplateImpl<TagToken> implements Template {
     name: string;
     private impl;
     constructor(token: TagToken, tokens: TopLevelToken[], liquid: Liquid);
-    render(ctx: Context, emitter: Emitter): IterableIterator<any>;
+    render(ctx: Context, emitter: Emitter): Generator<any, any, unknown>;
 }

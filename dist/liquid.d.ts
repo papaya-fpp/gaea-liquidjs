@@ -23,7 +23,7 @@ export declare class Liquid {
     _parseAndRender(html: string, scope?: object, opts?: LiquidOptions, sync?: boolean): IterableIterator<any>;
     parseAndRender(html: string, scope?: object, opts?: LiquidOptions): Promise<any>;
     parseAndRenderSync(html: string, scope?: object, opts?: LiquidOptions): any;
-    _parseFile(file: string, opts?: LiquidOptions, sync?: boolean): IterableIterator<any>;
+    _parseFile(file: string, opts?: LiquidOptions, sync?: boolean): Generator<Template[] | Promise<Template[]> | Promise<boolean> | Promise<string>, any, string>;
     parseFile(file: string, opts?: LiquidOptions): Promise<Template[]>;
     parseFileSync(file: string, opts?: LiquidOptions): Template[];
     renderFile(file: string, ctx?: object, opts?: LiquidOptions): Promise<any>;
@@ -33,7 +33,7 @@ export declare class Liquid {
     evalValueSync(str: string, ctx: Context): any;
     registerFilter(name: string, filter: FilterImplOptions): void;
     registerTag(name: string, tag: TagImplOptions): void;
-    plugin(plugin: (this: Liquid, L: typeof Liquid) => void): void;
+    plugin(plugin: (this: Liquid, L: typeof Liquid) => void): any;
     express(): (this: any, filePath: string, ctx: object, callback: (err: Error | null, rendered: string) => void) => void;
     private lookupError;
     /**

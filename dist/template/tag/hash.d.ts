@@ -12,5 +12,5 @@ export declare class Hash {
         [key: string]: any;
     };
     constructor(markup: string);
-    render(ctx: Context): IterableIterator<any>;
+    render(ctx: Context): Generator<any, {}, any>;
 }

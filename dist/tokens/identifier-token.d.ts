@@ -3,8 +3,8 @@ export declare class IdentifierToken extends Token {
     input: string;
     begin: number;
     end: number;
-    file?: string | undefined;
+    file?: string;
     content: string;
-    constructor(input: string, begin: number, end: number, file?: string | undefined);
+    constructor(input: string, begin: number, end: number, file?: string);
     isNumber(allowSign?: boolean): boolean;
 }

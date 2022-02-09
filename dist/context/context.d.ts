@@ -1,4 +1,3 @@
-import { Drop } from '../drop/drop';
 import { NormalizedFullOptions } from '../liquid-options';
 import { Scope } from './scope';
 export declare class Context {
@@ -13,11 +12,11 @@ export declare class Context {
     setRegister(key: string, value: any): any;
     saveRegister(...keys: string[]): [string, any][];
     restoreRegister(keyValues: [string, any][]): void;
-    getAll(): Scope;
+    getAll(): any;
     get(paths: string[]): object;
     getFromScope(scope: object, paths: string[] | string): object;
     push(ctx: object): number;
-    pop(): import("./scope").PlainObject | Drop | undefined;
+    pop(): Scope;
     bottom(): Scope;
     private findScope;
     private isHexColor;

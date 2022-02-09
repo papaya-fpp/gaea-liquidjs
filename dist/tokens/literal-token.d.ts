@@ -3,7 +3,7 @@ export declare class LiteralToken extends Token {
     input: string;
     begin: number;
     end: number;
-    file?: string | undefined;
+    file?: string;
     literal: string;
-    constructor(input: string, begin: number, end: number, file?: string | undefined);
+    constructor(input: string, begin: number, end: number, file?: string);
 }

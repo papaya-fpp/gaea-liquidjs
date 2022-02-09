@@ -6,6 +6,6 @@ export declare class RangeToken extends Token {
     end: number;
     lhs: ValueToken;
     rhs: ValueToken;
-    file?: string | undefined;
-    constructor(input: string, begin: number, end: number, lhs: ValueToken, rhs: ValueToken, file?: string | undefined);
+    file?: string;
+    constructor(input: string, begin: number, end: number, lhs: ValueToken, rhs: ValueToken, file?: string);
 }
