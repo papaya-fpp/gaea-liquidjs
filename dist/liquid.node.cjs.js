@@ -2590,7 +2590,6 @@ function parseArgsToFormJson(args) {
         enctype: 'multipart/form-data',
         method: 'post',
         'accept-charset': 'UTF-8',
-        type: ''
     };
     if (!argsList.length) {
         return defaultArgsJson;

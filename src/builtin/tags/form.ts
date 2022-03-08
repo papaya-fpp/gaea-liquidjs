@@ -15,14 +15,21 @@ const formTypeMapper = {
   }
 }
 
+interface IArgsJson {
+  enctype: string;
+  method: string;
+  'accept-charset': string;
+  type?: string;
+}
+
 // 将args解析成 json,并添加form默认属性
 function parseArgsToFormJson (args: string): object {
   const argsList = args.split(',').map((i) => i.replace(/\s/g, ''))
-  const defaultArgsJson = {
+  const defaultArgsJson: IArgsJson = {
     enctype: 'multipart/form-data',
     method: 'post',
-    'accept-charset': 'UTF-8',
-    type: ''
+    'accept-charset': 'UTF-8'
+    // type: ''
   }
   if (!argsList.length) {
     return defaultArgsJson
