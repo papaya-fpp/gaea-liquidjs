@@ -71,6 +71,7 @@ export default {
     const tokenizer = new Tokenizer(tagToken.args, this.liquid.options.operatorsTrie)
     this.variable = readVariableName(tokenizer)
     this.templates = []
+    
     const stream = this.liquid.parser.parseStream(remainTokens)
     this.args = parseToForm(tagToken.args)
     stream.on('tag:endform', () => stream.stop())

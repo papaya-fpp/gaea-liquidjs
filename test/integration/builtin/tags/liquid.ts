@@ -8,6 +8,19 @@ use(chaiAsPromised)
 describe('tags/liquid',  function () {
   const liquid = new Liquid()
 
+
+  it('should support for in liquid ', async function () {
+    const src = `
+    {% liquid
+      for item in arr
+          echo item
+      endfor
+     %}
+    `
+    const result = await liquid.parseAndRender(src, {arr: [1,2,3,4]})
+    expect(result).to.equal('\n     \n 1  \n \n 2  \n \n 3  \n \n 4  \n\n    ')
+  })
+
   it('should support empty ', async function () {
     const src = `{%- liquid-%}`
     const result = await liquid.parseAndRender(src)
@@ -53,7 +66,7 @@ describe('tags/liquid',  function () {
     expect(result).to.equal('page1')
   })
 
-  it('should support for ', async function () {
+  it('should support for outside liquid ', async function () {
     const src = `
     {%- for item in (1..3) -%}
       {% liquid
