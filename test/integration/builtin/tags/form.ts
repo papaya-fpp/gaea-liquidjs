@@ -4,8 +4,17 @@ import * as chaiAsPromised from 'chai-as-promised'
 
 use(chaiAsPromised)
 
+
+const user = {
+  name: "王二",
+  age: "40",
+  id: 20220410
+}
+
 describe('tags/form',  function () {
   const liquid = new Liquid()
+
+
 
   it('should support pure form ', async function () {
     const src = `
@@ -13,11 +22,14 @@ describe('tags/form',  function () {
         <input type="hidden" name="id" >
       {%- endform -%}
     `
-    const result = await liquid.parseAndRender(src)
+
+    const result = await liquid.parseAndRender(src, {user})
+
     expect(result).to.equal('<form  enctype="multipart/form-data" method="post" accept-charset="UTF-8" type="product" action="/cart/add">\n    <input type="hidden" value="product" name="form_type">\n    <input type="hidden" name="utf8" value="✓">\n  <input type="hidden" name="id" ></form>')
   })
 
-  it('should support id and class ', async function () {
+
+  it('should support id and class, [只] 传入hash参数 ', async function () {
     const src = `
       {%- form 'product', id: 'product-form-installment', class: 'installment caption-large' -%}
         <input type="hidden" name="id" >
@@ -91,6 +103,21 @@ describe('tags/form',  function () {
     const result = await liquid.parseAndRender(src)
     expect(result).to.equal('\n    <form  enctype="multipart/form-data" method="post" accept-charset="UTF-8" type="product" action="/cart/add">\n    <input type="hidden" value="product" name="form_type">\n    <input type="hidden" name="utf8" value="✓">\n  bar</form>')
   })
+
+
+
+  it('user 应该被赋值给内部scope的form', async function () {
+    const src = `
+      {%- form 'product', user-%}
+        <input type="hidden" name="{{form.name}}"  id={{form.id}}>
+      {%- endform -%}
+    `
+
+    const result = await liquid.parseAndRender(src, { user })
+
+    expect(result).to.equal('<form  enctype="multipart/form-data" method="post" accept-charset="UTF-8" type="product" action="/cart/add">\n    <input type="hidden" value="product" name="form_type">\n    <input type="hidden" name="utf8" value="✓">\n  <input type="hidden" name="王二"  id=20220410></form>')
+  })
+  
 
 
   

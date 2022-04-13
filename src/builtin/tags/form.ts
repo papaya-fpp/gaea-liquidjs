@@ -1,4 +1,4 @@
-import { Emitter, TagToken, Context, TagImplOptions } from '../../types'
+import { Emitter, TagToken, evalToken, Context, TagImplOptions, Hash } from '../../types'
 import { Tokenizer } from '../../parser/tokenizer'
 import { joinJsonToStr, getLiquidValue } from '../../util/underscore'
 import { evalQuotedToken } from '../../render/expression'
@@ -67,14 +67,22 @@ function parseToForm (args: string) {
 }
 
 export default {
-  parse: function (tagToken: TagToken, remainTokens) {
+  parse: function (tagToken, remainTokens) {
+
     const tokenizer = new Tokenizer(tagToken.args, this.liquid.options.operatorsTrie)
-    this.variable = readVariableName(tokenizer)
+
     this.templates = []
-    
+    const value = tokenizer.readValue()
+    // const formTypeString = value.getText()
+    // this.formTagStart = `<form type=${formTypeString}>` // <form type='product'>
+    this.formTagStart = parseToForm(tagToken.args)
+    tokenizer.readTo(',')
+    tokenizer.skipBlank()
+
+    this.valueShouldBePassedToForm = tokenizer.readValue() // kind 128
     const stream = this.liquid.parser.parseStream(remainTokens)
-    this.args = parseToForm(tagToken.args)
-    stream.on('tag:endform', () => stream.stop())
+    stream
+      .on('tag:endform', () => stream.stop())
       .on('template', (tpl) => {
         this.templates.push(tpl)
       })
@@ -82,19 +90,22 @@ export default {
         throw new Error(`tag ${tagToken.getText()} not closed`)
       })
     stream.start()
-  },
 
-  render: function * (ctx: Context, emitter: Emitter) {
-    const r = this.liquid.renderer
-    const html: any = yield r.renderTemplates(this.templates, ctx)
-    const str = `${this.args}${html}</form>`
-    return str
+    this.hash = new Hash(tokenizer.remaining())
+  },
+  render: function * (ctx, emitter) {
+    const { liquid, hash, templates, valueShouldBePassedToForm } = this
+    const formShadow = evalToken(valueShouldBePassedToForm, ctx)
+
+    const { renderer } = liquid
+
+    const childCtx = new Context({ form: formShadow }, ctx.opts, ctx.sync)
+    const scope = yield hash.render(ctx)
+
+    childCtx.push(ctx.getAll())
+    childCtx.push(scope)
+
+    const innerHtml = yield renderer.renderTemplates(templates, childCtx)
+    emitter.write(this.formTagStart + innerHtml + '</form>')
   }
 } as TagImplOptions
-
-function readVariableName (tokenizer: Tokenizer) {
-  const word = tokenizer.readIdentifier().content
-  if (word) return word
-  const quoted = tokenizer.readQuoted()
-  if (quoted) return evalQuotedToken(quoted)
-}
