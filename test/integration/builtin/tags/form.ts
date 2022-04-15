@@ -14,6 +14,18 @@ const user = {
 describe('tags/form',  function () {
   const liquid = new Liquid()
 
+  it('应该支持: 可以把外部变量 赋值 给 form标签 的自定义属性', async function () {
+    const product_for_id="999999"
+
+    const src = `
+      {%- form 'product', id: product_for_id, uid: user.id ,class: 'self-class' -%}
+        <input type="hidden" >
+      {%- endform -%}
+    `
+
+    const result = await liquid.parseAndRender(src, { user, product_for_id })
+    expect(result).to.equal('<form  enctype="multipart/form-data" method="post" accept-charset="UTF-8" type="product" action="/cart/add" id="999999" uid="20220410" class="self-class">\n    <input type="hidden" value="product" name="form_type">\n    <input type="hidden" name="utf8" value="✓">\n  <input type="hidden" ></form>')
+  })
 
 
   it('should support pure form ', async function () {

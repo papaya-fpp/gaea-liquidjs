@@ -106,6 +106,7 @@ export default {
     childCtx.push(scope)
 
     const innerHtml = yield renderer.renderTemplates(templates, childCtx)
-    emitter.write(this.formTagStart + innerHtml + '</form>')
+    const forTagStartHtml = yield liquid.parseAndRender(this.formTagStart, childCtx.getAll())
+    emitter.write(forTagStartHtml + innerHtml + '</form>')
   }
 } as TagImplOptions
