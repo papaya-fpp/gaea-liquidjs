@@ -15,17 +15,15 @@ describe('filters/asset_url', function () {
     describe('color_modify', function () {
         
         it('转换alpha', async function () {
-            const product_for_id = "999999"
+            const settings= {
+                color: '#ff00ff'
+            }
 
-            const src = `
-        
-            color: {{ '#7ab55c' | color_modify: 'red', 255 }} 
-        
-        `
+            const src = `color1: {{ settings.color | color_modify: 'alpha', 0.23 }}`
 
-            const result = await liquid.parseAndRender(src)
+            const result = await liquid.parseAndRender(src, {settings})
             console.log(result)
-            // expect(result).to.equal('<form  enctype="multipart/form-data" method="post" accept-charset="UTF-8" type="product" action="/cart/add" id="999999" uid="20220410" class="self-class">\n    <input type="hidden" value="product" name="form_type">\n    <input type="hidden" name="utf8" value="✓">\n  <input type="hidden" ></form>')
+            expect(result).to.equal('color1: rgba(255, 0, 255,0.23)')
         })
 
     })
