@@ -152,24 +152,3 @@ export function caseInsensitiveCompare (a: any, b: any) {
   if (a > b) return 1
   return 0
 }
-
-// 将json合并为字符串
-export function joinJsonToStr (json: object): string {
-  let str = ''
-  Object.keys(json).forEach(key => {
-    const val = `"${json[key]}"`
-    // 过滤重复 '" | '"
-    const regVal = val.replace(/"'|'"/g, '"')
-    str += ` ${key}=${regVal}`
-  })
-  return str
-}
-
-// 获取值，如果不饱和'/" ，按照变量处理，返回 {{ value }}
-export function getLiquidValue (str: string): string {
-  let value = str
-  if (!/['"]/g.test(str)) {
-    value = `{{ ${str} }}`
-  }
-  return trim(value.replace(/['"]/g, ''))
-}

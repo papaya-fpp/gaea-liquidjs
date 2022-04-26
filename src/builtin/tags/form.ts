@@ -1,8 +1,27 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import { Emitter, TagToken, evalToken, Context, TagImplOptions, Hash } from '../../types'
 import { Tokenizer } from '../../parser/tokenizer'
-import { joinJsonToStr, getLiquidValue } from '../../util/underscore'
 import { trim } from 'lodash'
+// 将json合并为字符串
+export function joinJsonToStr (json: object): string {
+  let str = ''
+  Object.keys(json).forEach(key => {
+    const val = `"${json[key]}"`
+    // 过滤重复 '" | '"
+    const regVal = val.replace(/"'|'"/g, '"')
+    str += ` ${key}=${regVal}`
+  })
+  return str
+}
 
+// 获取值，如果不饱和'/" ，按照变量处理，返回 {{ value }}
+export function getLiquidValue (str: string): string {
+  let value = str
+  if (!/['"]/g.test(str)) {
+    value = `{{ ${str} }}`
+  }
+  return trim(value.replace(/['"]/g, ''))
+}
 
 /******
  * 不同类型自定义参数配置
@@ -13,9 +32,33 @@ import { trim } from 'lodash'
 const formTypeMapper = {
   product: {
     action: '/cart/add'
+  },
+  contact: {
+    action: '/contact'
+  },
+  customer: {
+    action: '/contact'
+  },
+  customer_login: {
+    action: '/account/login'
+  },
+  create_customer: {
+    action: '/account/register'
+  },
+  recover_customer_password: {
+    // action: '/account/recover'
+    action: '/account/login#recover'
+  },
+  reset_customer_password: {
+    action: '/account/reset'
+  },
+  customer_address: {
+    action: '/account/addresses'
+  },
+  localization: {
+    action: '/localization'
   }
 }
-
 interface IArgsJson {
   enctype: string;
   method: string;
@@ -24,13 +67,12 @@ interface IArgsJson {
 }
 
 // 将args解析成 json,并添加form默认属性
-function parseArgsToFormJson (args: string): object {
+function parseArgsToFormJson (args: string, formShadow): object {
   const argsList = args.split(',').map((i) => trim(i))
   const defaultArgsJson: IArgsJson = {
     enctype: 'multipart/form-data',
     method: 'post',
     'accept-charset': 'UTF-8'
-    // type: ''
   }
   if (!argsList.length) {
     return defaultArgsJson
@@ -55,11 +97,16 @@ function parseArgsToFormJson (args: string): object {
     result[arr[0]] = getLiquidValue(arr[1])
   })
 
+  if (type === 'customer_address' && formShadow && formShadow.url) {
+    result['action'] = formShadow.url
+  }
+
   return result
 }
 
-function parseToForm (args: string) {
-  const argsJson: any = parseArgsToFormJson(args)
+function parseToForm (args, formShadow) {
+  const argsJson = parseArgsToFormJson(args, formShadow)
+
   const defaultFormStr = `<form ${joinJsonToStr(argsJson)}>
     <input type="hidden" value="${argsJson.type || ''}" name="form_type">
     <input type="hidden" name="utf8" value="✓">
@@ -69,14 +116,11 @@ function parseToForm (args: string) {
 
 export default {
   parse: function (tagToken, remainTokens) {
-
     const tokenizer = new Tokenizer(tagToken.args, this.liquid.options.operatorsTrie)
 
     this.templates = []
-    const value = tokenizer.readValue()
-    // const formTypeString = value.getText()
-    // this.formTagStart = `<form type=${formTypeString}>` // <form type='product'>
-    this.formTagStart = parseToForm(tagToken.args)
+    this.formArgs = tagToken.args
+
     tokenizer.readTo(',')
     tokenizer.skipBlank()
 
@@ -107,7 +151,9 @@ export default {
     childCtx.push(scope)
 
     const innerHtml = yield renderer.renderTemplates(templates, childCtx)
-    const forTagStartHtml = yield liquid.parseAndRender(this.formTagStart, childCtx.getAll())
+    const formTagStart = parseToForm(this.formArgs, formShadow)
+
+    const forTagStartHtml = yield liquid.parseAndRender(formTagStart, childCtx.getAll())
     emitter.write(forTagStartHtml + innerHtml + '</form>')
   }
 } as TagImplOptions

@@ -14,6 +14,25 @@ const user = {
 describe('tags/form',  function () {
   const liquid = new Liquid()
 
+  const address = {
+    url: "/customer/address/123456"
+  }
+
+  it('应该支持: create_customer 把 action 改成传入的address.url', async function () {
+    const product_for_id = "999999"
+
+    const src = `
+      {%- form 'customer_address', address, id: product_for_id, uid: user.id ,class:'class1 class2' -%}
+        <input type="hidden" >
+      {%- endform -%}
+    `
+
+    const result = await liquid.parseAndRender(src, { user, product_for_id, address })
+    console.log(result)
+    expect(result).to.equal('<form  enctype="multipart/form-data" method="post" accept-charset="UTF-8" type="customer_address" action="/customer/address/123456" id="999999" uid="20220410" class="class1 class2">\n    <input type="hidden" value="customer_address" name="form_type">\n    <input type="hidden" name="utf8" value="✓">\n  <input type="hidden" ></form>')
+  })
+
+
   it('应该支持: class传入两个类名', async function () {
     const product_for_id = "999999"
 
