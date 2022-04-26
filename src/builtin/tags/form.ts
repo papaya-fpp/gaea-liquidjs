@@ -1,7 +1,8 @@
 import { Emitter, TagToken, evalToken, Context, TagImplOptions, Hash } from '../../types'
 import { Tokenizer } from '../../parser/tokenizer'
 import { joinJsonToStr, getLiquidValue } from '../../util/underscore'
-import { evalQuotedToken } from '../../render/expression'
+import { trim } from 'lodash'
+
 
 /******
  * 不同类型自定义参数配置
@@ -24,7 +25,7 @@ interface IArgsJson {
 
 // 将args解析成 json,并添加form默认属性
 function parseArgsToFormJson (args: string): object {
-  const argsList = args.split(',').map((i) => i.replace(/\s/g, ''))
+  const argsList = args.split(',').map((i) => trim(i))
   const defaultArgsJson: IArgsJson = {
     enctype: 'multipart/form-data',
     method: 'post',

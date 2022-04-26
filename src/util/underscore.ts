@@ -1,4 +1,5 @@
 import { Drop } from '../drop/drop'
+import { trim } from 'lodash'
 
 const toStr = Object.prototype.toString
 const toLowerCase = String.prototype.toLowerCase
@@ -170,5 +171,5 @@ export function getLiquidValue (str: string): string {
   if (!/['"]/g.test(str)) {
     value = `{{ ${str} }}`
   }
-  return value
+  return trim(value.replace(/['"]/g, ''))
 }

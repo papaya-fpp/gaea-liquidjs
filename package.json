@@ -15,7 +15,7 @@
     "check": "npm test && npm run lint",
     "unit": "mocha \"test/unit/**/*.ts\"",
     "integration": "mocha \"test/integration/**/*.ts\"",
-    "mopa": "mocha \"test/integration/builtin/filters/color_modify.ts\"",
+    "mopa": "mocha \"test/integration/builtin/tags/form.ts\"",
     "e2e": "mocha \"test/e2e/**/*.ts\"",
     "test": "nyc mocha \"test/**/*.ts\"",
     "benchmark:prepare": "cd benchmark && npm ci",

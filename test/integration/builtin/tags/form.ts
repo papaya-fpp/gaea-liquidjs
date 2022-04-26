@@ -14,6 +14,19 @@ const user = {
 describe('tags/form',  function () {
   const liquid = new Liquid()
 
+  it('应该支持: class传入两个类名', async function () {
+    const product_for_id = "999999"
+
+    const src = `
+      {%- form 'product', id: product_for_id, uid: user.id ,class:'class1 class2' -%}
+        <input type="hidden" >
+      {%- endform -%}
+    `
+
+    const result = await liquid.parseAndRender(src, { user, product_for_id })
+    expect(result).to.equal('<form  enctype="multipart/form-data" method="post" accept-charset="UTF-8" type="product" action="/cart/add" id="999999" uid="20220410" class="class1 class2">\n    <input type="hidden" value="product" name="form_type">\n    <input type="hidden" name="utf8" value="✓">\n  <input type="hidden" ></form>')
+  })
+
   it('应该支持: 可以把外部变量 赋值 给 form标签 的自定义属性', async function () {
     const product_for_id="999999"
 
@@ -48,7 +61,7 @@ describe('tags/form',  function () {
       {%- endform -%}
     `
     const result = await liquid.parseAndRender(src)
-    expect(result).to.equal('<form  enctype="multipart/form-data" method="post" accept-charset="UTF-8" type="product" action="/cart/add" id="product-form-installment" class="installmentcaption-large">\n    <input type="hidden" value="product" name="form_type">\n    <input type="hidden" name="utf8" value="✓">\n  <input type="hidden" name="id" ></form>')
+    expect(result).to.equal('<form  enctype="multipart/form-data" method="post" accept-charset="UTF-8" type="product" action="/cart/add" id="product-form-installment" class="installment caption-large">\n    <input type="hidden" value="product" name="form_type">\n    <input type="hidden" name="utf8" value="✓">\n  <input type="hidden" name="id" ></form>')
   })
 
   it('should support content dom ', async function () {
@@ -59,7 +72,7 @@ describe('tags/form',  function () {
       {%- endform -%}
     `
     const result = await liquid.parseAndRender(src)
-    expect(result).to.equal('<form  enctype="multipart/form-data" method="post" accept-charset="UTF-8" type="product" action="/cart/add" id="product-form-installment" class="installmentcaption-large">\n    <input type="hidden" value="product" name="form_type">\n    <input type="hidden" name="utf8" value="✓">\n  <input type="hidden" name="id" >\n        <div id="123">id123</div></form>')
+    expect(result).to.equal('<form  enctype="multipart/form-data" method="post" accept-charset="UTF-8" type="product" action="/cart/add" id="product-form-installment" class="installment caption-large">\n    <input type="hidden" value="product" name="form_type">\n    <input type="hidden" name="utf8" value="✓">\n  <input type="hidden" name="id" >\n        <div id="123">id123</div></form>')
   })
 
   it('should support custom attribute ', async function () {
